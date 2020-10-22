@@ -1,0 +1,112 @@
+import Foundation
+import AppAuth
+import TIMEncryptedStorage
+
+/// Shared wrapper for Auth and Storage errors.
+public enum TIMError: Error, LocalizedError {
+    case auth(TIMAuthError)
+    case storage(TIMStorageError)
+
+    public var errorDescription: String? {
+        switch self {
+        case .auth(let error):
+            return error.localizedDescription
+        case .storage(let error):
+            return error.localizedDescription
+        }
+    }
+}
+
+/// Errors related to AppAuth operations
+public enum TIMAuthError: Error, LocalizedError {
+    case authStateNil
+    case failedToDiscoverConfiguration
+    case failedToBeginAuth
+    case failedToGetAccessToken
+    case failedToGetRefreshToken
+    case networkError
+    case refreshTokenExpired
+    case appAuthFailed(Error?)
+
+    public var errorDescription: String? {
+        switch self {
+        case .authStateNil:
+            return "The AuthState was nil, when it wasn't expected to be. Are you trying to get the access token, when there was no valid session?"
+        case .failedToDiscoverConfiguration:
+            return "Failed to discover the configuration on the server. Check your configuration setup and try again."
+        case .failedToBeginAuth:
+            return "AppAuth returned a weird state, while we tried to begin the authentication."
+        case .failedToGetAccessToken:
+            return "Failed to get the access token."
+        case .failedToGetRefreshToken:
+            return "Failed to get the refresh token."
+        case .networkError:
+            return "Network error caused by AppAuth"
+        case .refreshTokenExpired:
+            return "The refresh token has expired."
+        case .appAuthFailed(let error):
+            return "Something went wrong in the AppAuth framework: \(error?.localizedDescription ?? "nil")"
+        }
+    }
+
+    static func mapAppAuthError(_ error: Error?) -> TIMAuthError {
+        guard let error = error as NSError? else {
+            return .appAuthFailed(nil)
+        }
+
+        if error.domain == OIDGeneralErrorDomain {
+            switch error.code {
+            case OIDErrorCode.networkError.rawValue: return .networkError
+            default: return .appAuthFailed(error)
+            }
+        } else if error.domain == OIDOAuthTokenErrorDomain {
+            switch error.code {
+            case OIDErrorCodeOAuth.invalidGrant.rawValue: return .refreshTokenExpired
+            default: return .appAuthFailed(error)
+            }
+        }
+
+        return .appAuthFailed(error)
+    }
+}
+
+/// Errors related to storage operations
+public enum TIMStorageError: Error, LocalizedError {
+    case failedToStoreRefreshToken
+    case failedToGetRefreshToken
+    case encryptedStorageFailed(TIMEncryptedStorageError)
+
+    public var errorDescription: String? {
+        switch self {
+        case .failedToStoreRefreshToken:
+            return "Something went wrong while storing the refresh token in the keychain."
+        case .failedToGetRefreshToken:
+            return "Failed to get the refresh token."
+        case .encryptedStorageFailed(let error):
+            return "The encrypted storage failed: \(error.localizedDescription)"
+        }
+    }
+
+    public func isKeyLocked() -> Bool {
+        isKeyServiceError(.keyLocked)
+    }
+
+    public func isWrongPassword() -> Bool {
+        isKeyServiceError(.badPassword)
+    }
+
+    private func isKeyServiceError(_ keyServiceError: TIMKeyServiceError) -> Bool {
+        let isKeyServiceError: Bool
+        switch self {
+        case .encryptedStorageFailed(let error):
+            if case TIMEncryptedStorageError.keyServiceFailed(let ksError) = error {
+                isKeyServiceError = ksError == keyServiceError
+            } else {
+                isKeyServiceError = false
+            }
+        default:
+            isKeyServiceError = false
+        }
+        return isKeyServiceError
+    }
+}
