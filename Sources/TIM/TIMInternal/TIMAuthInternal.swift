@@ -13,6 +13,10 @@ class TIMAuthInternal : TIMAuth {
         self.storage = dataStorage
     }
 
+    var isLoggedIn: Bool {
+        return AppAuthController.shared.isLoggedIn
+    }
+
     var refreshToken: JWT? {
         return AppAuthController.shared.refreshToken()
     }

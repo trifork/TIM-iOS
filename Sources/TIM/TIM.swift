@@ -43,6 +43,10 @@ public final class TIM {
 
 /// Auth protocol
 public protocol TIMAuth {
+
+    /// Indicates whether the user as a valid auth state
+    var isLoggedIn: Bool { get }
+
     /// Gets the refresh token from the current session if available
     var refreshToken: JWT? { get }
 
