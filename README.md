@@ -297,8 +297,4 @@ https://github.com/openid/AppAuth-iOS
 
 ---
 
-<div style="text-align:center;width:100%;margin-top:20px;">
-
 ![Trifork Logo](https://jira.trifork.com/s/-p6q4kx/804003/9c3efa9da3fa1ef9d504f68de6c57528/_/jira-logo-scaled.png)
-
-</div>
