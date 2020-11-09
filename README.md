@@ -56,6 +56,9 @@ func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>)
 }
 ```
 
+### FaceID permission in Info.plist
+Don't forget to set the `NSFaceIDUsageDescription` [Apple documentation](https://developer.apple.com/documentation/bundleresources/information_property_list/nsfaceidusagedescription) key in your Info.plist if you are using the biometric feature of `TIM`.
+
 ## Common use cases
 
 The following exampes uses `TIM`'s `Combine` interface, which returns `Future` classes. If you are developing an app with a deployment target lower than iOS 13, the same interfaces exists with completion closures instead (those are deprecated from iOS 13 though).
