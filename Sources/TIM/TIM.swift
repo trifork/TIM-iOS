@@ -55,6 +55,7 @@ public protocol TIMAuth {
 
     /// Handles redirect from the `SFSafariViewController`. The return value determines whether the URL was handled by TIM.
     /// - Parameter url: The url that was directed to the app.
+    @discardableResult
     func handleRedirect(url: URL) -> Bool
 
     /// Gets the current access token from the current session if available.
