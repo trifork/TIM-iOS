@@ -25,7 +25,8 @@ class TIMAuthInternal : TIMAuth {
         AppAuthController.shared.logout()
     }
 
-    func handleRedirect(url: URL) {
+    @discardableResult
+    func handleRedirect(url: URL) -> Bool {
         AppAuthController.shared.handleRedirect(url: url)
     }
 }

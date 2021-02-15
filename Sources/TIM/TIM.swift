@@ -53,9 +53,10 @@ public protocol TIMAuth {
     /// Logs out the user of the current session, clearing the auth state with active tokens.
     func logout()
 
-    /// Handles redirect from the `SFSafariViewController`.
+    /// Handles redirect from the `SFSafariViewController`. The return value determines whether the URL was handled by TIM.
     /// - Parameter url: The url that was directed to the app.
-    func handleRedirect(url: URL)
+    @discardableResult
+    func handleRedirect(url: URL) -> Bool
 
     /// Gets the current access token from the current session if available.
     /// This will automatically renew the access token if necessary (by using the refresh token)

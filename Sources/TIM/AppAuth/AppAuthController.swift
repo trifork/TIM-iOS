@@ -205,7 +205,6 @@ final class AppAuthController {
         authState = nil
     }
 
-    @discardableResult
     func handleRedirect(url: URL) -> Bool {
         let result: Bool
         if currentAuthorizationFlow?.resumeExternalUserAgentFlow(with: url) == true {
