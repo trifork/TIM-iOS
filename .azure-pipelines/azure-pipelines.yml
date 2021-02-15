@@ -8,8 +8,8 @@ jobs:
     matrix:
       ios14:
         IMAGE_NAME: 'macos-10.15'
-        XCODE_DEVELOPER_PATH: /Applications/Xcode_12.1.app
-        IOS_SIMULATORS: 'iPhone 11,OS=14.0'
+        XCODE_DEVELOPER_PATH: /Applications/Xcode_12.4.app
+        IOS_SIMULATORS: 'iPhone 11,OS=14.3'
   pool:
     vmImage: $(IMAGE_NAME)
   steps:
