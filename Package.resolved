@@ -14,9 +14,9 @@
         "package": "TIMEncryptedStorage",
         "repositoryURL": "https://github.com/trifork/TIMEncryptedStorage-iOS",
         "state": {
-          "branch": "tkc/gcm-and-iv-security-issue",
-          "revision": "f4bd5b999190d549e3a8419dc5f4881d1e79770e",
-          "version": null
+          "branch": null,
+          "revision": "56fd133801c59d3939347b511cd53a92059b47cf",
+          "version": "1.1.0"
         }
       }
     ]
