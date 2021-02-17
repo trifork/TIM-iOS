@@ -33,7 +33,8 @@ let config = TIMConfiguration(
     keyService: TIMKeyServiceConfiguration(
         realmBaseUrl: "<TIM Keyservice URL>",
         version: .v1
-    )
+    ),
+    encryptionMethod: .aesGcm
 )
 TIM.configure(configuration: config)
 ```
