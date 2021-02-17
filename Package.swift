@@ -14,7 +14,8 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "AppAuth", url: "https://github.com/openid/AppAuth-iOS", .exact("1.4.0")),
-        .package(name: "TIMEncryptedStorage", url: "https://github.com/trifork/TIMEncryptedStorage-iOS", .exact("1.0.0"))
+        .package(name: "TIMEncryptedStorage", url: "https://github.com/trifork/TIMEncryptedStorage-iOS", .branch("tkc/gcm-and-iv-security-issue")),
+
     ],
     targets: [
         .target(
