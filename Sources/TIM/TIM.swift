@@ -35,7 +35,10 @@ public final class TIM {
     ///   - customLogger: An optional custom logger for logging messages internally from `TIM`. Set to `nil` to disable logging.
     public static func configure(configuration: TIMConfiguration, customLogger: TIMLoggerProtocol? = TIMLogger()) {
         AppAuthController.shared.configure(configuration.oidcConfiguration)
-        TIMKeyService.configure(configuration.keyServiceConfiguration)
+        TIMEncryptedStorage.configure(
+            keyServiceConfiguration: configuration.keyServiceConfiguration,
+            encryptionMethod: configuration.encryptionMethod
+        )
         logger = customLogger ?? TIMLogger()
     }
 }
