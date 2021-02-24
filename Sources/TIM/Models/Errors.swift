@@ -95,12 +95,23 @@ public enum TIMStorageError: Error, LocalizedError {
         isKeyServiceError(.badPassword)
     }
 
-    private func isKeyServiceError(_ keyServiceError: TIMKeyServiceError) -> Bool {
+    /// Determines whether this error is an error thrown by the KeyService
+    public func isKeyServiceError() -> Bool {
+        isKeyServiceError(nil)
+    }
+
+    /// Determines whether this error is a specific kind of key service error.
+    /// - Parameter keyServiceError: The key service error to look for. If `nil` is passed it will look for any kind of key service error.
+    private func isKeyServiceError(_ keyServiceError: TIMKeyServiceError?) -> Bool {
         let isKeyServiceError: Bool
         switch self {
         case .encryptedStorageFailed(let error):
             if case TIMEncryptedStorageError.keyServiceFailed(let ksError) = error {
-                isKeyServiceError = ksError == keyServiceError
+                if let keyServiceError = keyServiceError {
+                    isKeyServiceError = ksError == keyServiceError
+                } else {
+                    isKeyServiceError = true // Is any kind of key service error!
+                }
             } else {
                 isKeyServiceError = false
             }
