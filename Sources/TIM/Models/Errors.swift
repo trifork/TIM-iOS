@@ -95,7 +95,10 @@ public enum TIMStorageError: Error, LocalizedError {
         isKeyServiceError(.badPassword)
     }
 
-    /// Determines whether this error is an error thrown by the KeyService
+    /// Determines whether this error is an error thrown by the KeyService.
+    ///
+    /// This might be useful for handling unexpected cases from the encryption part of the framework.
+    /// When the key service fails you don't want to do any drastic fallback, since the server might "just" be down or the user have no internet connection. You will be able to recover later on, from a key service error.
     public func isKeyServiceError() -> Bool {
         isKeyServiceError(nil)
     }
