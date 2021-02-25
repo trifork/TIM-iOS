@@ -89,6 +89,18 @@ public enum TIMStorageError: Error, LocalizedError {
         isKeyServiceError(.badPassword)
     }
 
+    public func isBiometricFailedError() -> Bool {
+        switch self {
+        case .encryptedStorageFailed(let storageError):
+            if case .failedToLoadLongSecretViaBiometric = storageError {
+                return true
+            }
+            return false
+        default:
+            return false
+        }
+    }
+
     /// Determines whether this error is an error thrown by the KeyService.
     ///
     /// This might be useful for handling unexpected cases from the encryption part of the framework.
