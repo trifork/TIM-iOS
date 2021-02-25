@@ -73,11 +73,14 @@ public enum TIMAuthError: Error, LocalizedError {
 /// Errors related to storage operations
 public enum TIMStorageError: Error, LocalizedError {
     case encryptedStorageFailed(TIMEncryptedStorageError)
+    case noUserIdFoundInRefreshToken
 
     public var errorDescription: String? {
         switch self {
         case .encryptedStorageFailed(let error):
             return "The encrypted storage failed: \(error.localizedDescription)"
+        case .noUserIdFoundInRefreshToken:
+            return "TIM did not find any userId in the refresh token. The 'sub' property must be present!"
         }
     }
 
@@ -92,10 +95,12 @@ public enum TIMStorageError: Error, LocalizedError {
     public func isBiometricFailedError() -> Bool {
         switch self {
         case .encryptedStorageFailed(let storageError):
-            if case .failedToLoadLongSecretViaBiometric = storageError {
+            switch storageError {
+            case .keychainFailed(let keychainError) where keychainError == .authenticationFailedForData:
                 return true
+            default:
+                return false
             }
-            return false
         default:
             return false
         }
