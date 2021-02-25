@@ -271,6 +271,11 @@ if storageError.isKeyLocked() {
 if storageError.isWrongPassword() {
     // Handle wrong password
 }
+if storageError.isKeyServiceError() {
+    // The communication with the KeyService failed. E.g. no internet connection.
+}
+if storageError.isBiometricFailedError() {
+    // Handle biometric failed/was cancelled scenario.
 }
 ```
 

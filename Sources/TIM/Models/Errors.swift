@@ -72,18 +72,15 @@ public enum TIMAuthError: Error, LocalizedError {
 
 /// Errors related to storage operations
 public enum TIMStorageError: Error, LocalizedError {
-    case failedToStoreRefreshToken
-    case failedToGetRefreshToken
     case encryptedStorageFailed(TIMEncryptedStorageError)
+    case noUserIdFoundInRefreshToken
 
     public var errorDescription: String? {
         switch self {
-        case .failedToStoreRefreshToken:
-            return "Something went wrong while storing the refresh token in the keychain."
-        case .failedToGetRefreshToken:
-            return "Failed to get the refresh token."
         case .encryptedStorageFailed(let error):
             return "The encrypted storage failed: \(error.localizedDescription)"
+        case .noUserIdFoundInRefreshToken:
+            return "TIM did not find any userId in the refresh token. The 'sub' property must be present!"
         }
     }
 
@@ -93,6 +90,20 @@ public enum TIMStorageError: Error, LocalizedError {
 
     public func isWrongPassword() -> Bool {
         isKeyServiceError(.badPassword)
+    }
+
+    public func isBiometricFailedError() -> Bool {
+        switch self {
+        case .encryptedStorageFailed(let storageError):
+            switch storageError {
+            case .keychainFailed(let keychainError) where keychainError == .authenticationFailedForData:
+                return true
+            default:
+                return false
+            }
+        default:
+            return false
+        }
     }
 
     /// Determines whether this error is an error thrown by the KeyService.
