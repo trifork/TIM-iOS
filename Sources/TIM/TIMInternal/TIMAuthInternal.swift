@@ -65,7 +65,7 @@ extension TIMAuthInternal {
                                         completion(.success(accessToken))
                                     case .failure(let error):
                                         TIM.logger?.log("Failed to store refresh token after silent login: %@", error.localizedDescription)
-                                        completion(.failure(.storage(TIMStorageError.failedToStoreRefreshToken)))
+                                        completion(.failure(error))
                                     }
                                 }
                             } else {
@@ -105,7 +105,7 @@ extension TIMAuthInternal {
                                         completion(.success(accessToken))
                                     case .failure(let error):
                                         TIM.logger?.log("Failed to store refresh token after silent login: %@", error.localizedDescription)
-                                        completion(.failure(.storage(.failedToStoreRefreshToken)))
+                                        completion(.failure(error))
                                     }
                                 }
                             } else {
@@ -122,7 +122,7 @@ extension TIMAuthInternal {
                 }
             case .failure(let error):
                 TIM.logger?.log("Failed to get refresh token for userId: %@", error.localizedDescription)
-                completion(.failure(.storage(.failedToGetRefreshToken)))
+                completion(.failure(error))
             }
         }
     }

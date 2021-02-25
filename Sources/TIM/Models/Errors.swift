@@ -72,16 +72,10 @@ public enum TIMAuthError: Error, LocalizedError {
 
 /// Errors related to storage operations
 public enum TIMStorageError: Error, LocalizedError {
-    case failedToStoreRefreshToken
-    case failedToGetRefreshToken
     case encryptedStorageFailed(TIMEncryptedStorageError)
 
     public var errorDescription: String? {
         switch self {
-        case .failedToStoreRefreshToken:
-            return "Something went wrong while storing the refresh token in the keychain."
-        case .failedToGetRefreshToken:
-            return "Failed to get the refresh token."
         case .encryptedStorageFailed(let error):
             return "The encrypted storage failed: \(error.localizedDescription)"
         }
