@@ -164,7 +164,7 @@ public protocol TIMDataStorage {
     @available(iOS, deprecated: 13)
     func storeRefreshToken(_ refreshToken: JWT, withExistingPassword password: String, completion: @escaping (Result<Void, TIMError>) -> Void)
 
-    /// Stores refresh token with a new password.
+    /// Stores refresh token with a new password and removes current biometric access for potential previous refresh token.
     /// - Parameters:
     ///   - refreshToken: The refresh token.
     ///   - newPassword: The new password that needs a new encryption key.

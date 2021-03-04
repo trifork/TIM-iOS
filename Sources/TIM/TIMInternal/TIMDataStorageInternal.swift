@@ -66,6 +66,12 @@ final class TIMDataStorageInternal : TIMDataStorage {
         store(data: currentUserIds, storeID: .availableUserIds)
     }
 
+    private func disableCurrentBiometricAccess(userId: String) {
+        if let keyId: String = (try? get(storeID: .keyId(userId)).get()) {
+            TIMEncryptedStorage.removeLongSecret(keyId: keyId)
+        }
+    }
+
     // MARK: - Internal
     func storeRefreshTokenWithBiometricAccess(_ refreshToken: JWT, longSecret: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
         guard let userId: String = refreshToken.userId else {
@@ -112,9 +118,7 @@ final class TIMDataStorageInternal : TIMDataStorage {
     }
 
     func clear(userId: String) {
-        if let keyId: String = (try? get(storeID: .keyId(userId)).get()) {
-            TIMEncryptedStorage.removeLongSecret(keyId: keyId)
-        }
+        disableCurrentBiometricAccess(userId: userId)
 
         for id in TIMDataStorageStoreId.allUserSpecificCases(userId: userId) {
             TIMEncryptedStorage.remove(id: id.storeID())
@@ -215,6 +219,7 @@ extension TIMDataStorageInternal {
             completion: { (result) in
                 switch result {
                 case .success(let keyCreationData):
+                    self.disableCurrentBiometricAccess(userId: userId)
                     let storeResult: Result<Void, TIMKeychainError> = self.store(data: keyCreationData.keyId, storeID: .keyId(userId))
                     switch storeResult {
                     case .failure(let keychainError):
