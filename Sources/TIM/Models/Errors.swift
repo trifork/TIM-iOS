@@ -27,6 +27,7 @@ public enum TIMAuthError: Error, LocalizedError {
     case networkError
     case refreshTokenExpired
     case appAuthFailed(Error?)
+    case safariViewControllerCancelled
 
     public var errorDescription: String? {
         switch self {
@@ -46,6 +47,8 @@ public enum TIMAuthError: Error, LocalizedError {
             return "The refresh token has expired."
         case .appAuthFailed(let error):
             return "Something went wrong in the AppAuth framework: \(error?.localizedDescription ?? "nil")"
+        case .safariViewControllerCancelled:
+            return "The user cancelled OpenID connect login via SafariViewController"
         }
     }
 
@@ -67,6 +70,16 @@ public enum TIMAuthError: Error, LocalizedError {
         }
 
         return .appAuthFailed(error)
+    }
+
+    /// Tells whether the error was a `.safariViewControllerCancelled` or not.
+    public func isSafariViewControllerCancelled() -> Bool {
+        switch self {
+        case .safariViewControllerCancelled:
+            return true
+        default:
+            return false
+        }
     }
 }
 
