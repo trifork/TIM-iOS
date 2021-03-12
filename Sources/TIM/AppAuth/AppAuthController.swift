@@ -75,7 +75,7 @@ final class AppAuthController {
         )
     }
 
-    private func createRestoreFakeLastAuthorizationResponse(configuration: OIDServiceConfiguration) -> OIDAuthorizationResponse {
+    func createRestoreFakeLastAuthorizationResponse(configuration: OIDServiceConfiguration) -> OIDAuthorizationResponse {
         return OIDAuthorizationResponse(
             request: OIDAuthorizationRequest(
                 configuration: configuration,
