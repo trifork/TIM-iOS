@@ -44,9 +44,15 @@ extension TIMAuthInternal {
     }
 
     func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback) {
-        AppAuthController.shared.login(presentingViewController: presentingViewController) { (result: Result<JWT, TIMAuthError>) in
-            completion(result.mapError({ TIMError.auth($0) }))
-        }
+        AppAuthController.shared.login(
+            presentingViewController: presentingViewController,
+            completion: { (result: Result<JWT, TIMAuthError>) in
+                completion(result.mapError({ TIMError.auth($0) }))
+            },
+            didCancel: {
+                completion(.failure(TIMError.auth(.safariViewControllerCancelled)))
+            }
+        )
     }
 
     func loginWithPassword(userId: String, password: String, storeNewRefreshToken: Bool = true, completion: @escaping AccessTokenCallback) {
