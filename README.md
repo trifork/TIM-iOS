@@ -249,6 +249,9 @@ Most errors are helping you as a developer to figure out, what you might have co
 // Refresh token has expired
 TIMError.auth(TIMAuthError.refreshTokenExpired)
 
+// The user pressed cancel in the safari view controller during the OpenID Connect login
+TIMError.auth(TIMAuthError.safariViewControllerCancelled)
+
 TIMError.storage(
     TIMStorageError.encryptedStorageFailed(
         TIMEncryptedStorageError.keyServiceFailed(TIMKeyServiceError.badPassword)

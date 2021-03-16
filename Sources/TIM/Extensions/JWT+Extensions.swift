@@ -4,10 +4,10 @@ private let EXPIRE_KEY: String = "exp"
 private let SUB_KEY: String = "sub"
 
 /// Type alias for tokens - just a string.
-public typealias JWT = String
+public typealias JWTString = String
 
 /// Extensions for default data on a JWT.
-public extension JWT {
+extension JWTString {
 
     /// `exp` value
     var expireTimestamp: TimeInterval? {

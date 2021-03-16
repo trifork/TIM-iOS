@@ -136,7 +136,7 @@ final class AppAuthController {
         }
     }
 
-    func silentLogin(refreshToken: String, completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
+    func silentLogin(refreshToken: JWT, completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
         discoverConfiguration { [weak self] (res: Result<OIDServiceConfiguration, TIMAuthError>) in
             switch res {
             case .success(let configuration):
@@ -151,7 +151,7 @@ final class AppAuthController {
                     clientID: self.credentials.clientId,
                     clientSecret: nil,
                     scopes: self.credentials.scopes,
-                    refreshToken: refreshToken,
+                    refreshToken: refreshToken.token,
                     codeVerifier: nil,
                     additionalParameters: nil
                 )
@@ -159,10 +159,14 @@ final class AppAuthController {
                     let result: Result<JWT, TIMAuthError>
                     if let error = error {
                         result = .failure(.mapAppAuthError(error))
-                    } else if let token = token, let jwt = token.accessToken {
+                    } else if let token = token, let rawAccessToken = token.accessToken {
                         let authResponse = self?.createRestoreFakeLastAuthorizationResponse(configuration: configuration)
                         self?.authState = OIDAuthState(authorizationResponse: authResponse, tokenResponse: token, registrationResponse: nil)
-                        result = .success(jwt)
+                        if let jwt = JWT(token: rawAccessToken) {
+                            result = .success(jwt)
+                        } else {
+                            result = .failure(.failedToGetRequiredDataInToken)
+                        }
                     } else {
                         result = .failure(TIMAuthError.failedToGetAccessToken)
                     }
@@ -187,18 +191,29 @@ final class AppAuthController {
             authState.setNeedsTokenRefresh()
         }
         authState.performAction { (accessToken: String?, _, error: Error?) in
-
-            self.handleAppAuthCallback(
-                value: accessToken,
-                error: error,
-                fallbackError: TIMAuthError.failedToGetAccessToken,
-                completion: completion
-            )
+            if let accessToken = accessToken {
+                if let jwt = JWT(token: accessToken) {
+                    self.handleAppAuthCallback(
+                        value: jwt,
+                        error: error,
+                        fallbackError: TIMAuthError.failedToGetAccessToken,
+                        completion: completion
+                    )
+                } else {
+                    completion(.failure(.failedToGetRequiredDataInToken))
+                }
+            } else {
+                completion(.failure(.failedToGetAccessToken))
+            }
         }
     }
 
     func refreshToken() -> JWT? {
-        authState?.refreshToken
+        if let refreshToken = authState?.refreshToken {
+            return JWT(token: refreshToken)
+        } else {
+            return nil
+        }
     }
 
     func logout() {

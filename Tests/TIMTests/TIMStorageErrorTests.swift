@@ -4,7 +4,6 @@ import XCTest
 final class TIMStorageErrorTests: XCTestCase {
 
     func testIsKeyLocked() {
-        XCTAssertFalse(TIMStorageError.noUserIdFoundInRefreshToken.isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keychainFailed(.failedToLoadData)).isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badInternet)).isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badPassword)).isKeyLocked())
@@ -12,7 +11,6 @@ final class TIMStorageErrorTests: XCTestCase {
     }
 
     func testIsWrongPassword() {
-        XCTAssertFalse(TIMStorageError.noUserIdFoundInRefreshToken.isWrongPassword())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keychainFailed(.failedToStoreData)).isWrongPassword())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badInternet)).isWrongPassword())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.keyLocked)).isWrongPassword())
@@ -20,7 +18,6 @@ final class TIMStorageErrorTests: XCTestCase {
     }
 
     func testIsKeyServiceError() {
-        XCTAssertFalse(TIMStorageError.noUserIdFoundInRefreshToken.isKeyServiceError())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keychainFailed(.authenticationFailedForData)).isKeyServiceError())
         XCTAssertTrue(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badInternet)).isKeyServiceError())
         XCTAssertTrue(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.keyLocked)).isKeyServiceError())
@@ -28,7 +25,6 @@ final class TIMStorageErrorTests: XCTestCase {
     }
 
     func testIsBiometricError() {
-        XCTAssertFalse(TIMStorageError.noUserIdFoundInRefreshToken.isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keychainFailed(.failedToLoadData)).isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badInternet)).isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badPassword)).isKeyLocked())

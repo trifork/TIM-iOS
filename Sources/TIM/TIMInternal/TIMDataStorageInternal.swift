@@ -74,18 +74,14 @@ final class TIMDataStorageInternal : TIMDataStorage {
 
     // MARK: - Internal
     func storeRefreshTokenWithBiometricAccess(_ refreshToken: JWT, longSecret: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
-        guard let userId: String = refreshToken.userId else {
-            return completion(.failure(.storage(.noUserIdFoundInRefreshToken)))
-        }
-
-        let keyIdResult: Result<String, TIMKeychainError> = get(storeID: .keyId(userId))
+        let keyIdResult: Result<String, TIMKeychainError> = get(storeID: .keyId(refreshToken.userId))
         switch keyIdResult {
         case .failure(let keychainError):
             completion(.failure(.storage(.encryptedStorageFailed(.keychainFailed(keychainError)))))
         case .success(let keyId):
             TIMEncryptedStorage.store(
-                id: TIMDataStorageStoreId.refreshToken(userId).storeID(),
-                data: refreshToken.convert(),
+                id: TIMDataStorageStoreId.refreshToken(refreshToken.userId).storeID(),
+                data: refreshToken.token.convert(),
                 keyId: keyId,
                 longSecret: longSecret) { (result) in
                 completion(result.mapError({ TIMError.storage(.encryptedStorageFailed($0)) }))
@@ -134,7 +130,7 @@ final class TIMDataStorageInternal : TIMDataStorage {
 /// From iOS 13 these are still used, but wrapped in a Combine interface with `Future`.
 @available(iOS, deprecated: 13)
 extension TIMDataStorageInternal {
-    func getStoredRefreshToken(userId: String, password: String, completion: @escaping (Result<String, TIMError>) -> Void) {
+    func getStoredRefreshToken(userId: String, password: String, completion: @escaping (Result<JWT, TIMError>) -> Void) {
         let keyIdResult: Result<String, TIMKeychainError> = get(storeID: .keyId(userId))
         switch keyIdResult {
         case .failure(let keychainError):
@@ -143,8 +139,9 @@ extension TIMDataStorageInternal {
             TIMEncryptedStorage.get(id: TIMDataStorageStoreId.refreshToken(userId).storeID(), keyId: keyId, secret: password, completion: { (result) in
                 switch result {
                 case .success(let rtData):
-                    if let refreshToken = JWT.convert(data: rtData) {
-                        completion(.success(refreshToken))
+                    if let refreshToken = JWTString.convert(data: rtData),
+                       let tokenResult = JWT(token: refreshToken) {
+                        completion(.success(tokenResult))
                     } else {
                         completion(.failure(.storage(.encryptedStorageFailed(.unexpectedData))))
                     }
@@ -166,8 +163,8 @@ extension TIMDataStorageInternal {
             TIMEncryptedStorage.getViaBiometric(id: TIMDataStorageStoreId.refreshToken(userId).storeID(), keyId: keyId) { (result) in
                 switch result {
                 case .success(let model):
-                    if let refreshToken = JWT.convert(data: model.data) {
-                        let bioRT = BiometricRefreshToken(refreshToken: refreshToken, longSecret: model.longSecret)
+                    if let refreshToken = JWTString.convert(data: model.data), let jwt = JWT(token: refreshToken) {
+                        let bioRT = BiometricRefreshToken(refreshToken: jwt, longSecret: model.longSecret)
                         completion(.success(bioRT))
                     } else {
                         completion(.failure(.storage(.encryptedStorageFailed(.unexpectedData))))
@@ -180,24 +177,19 @@ extension TIMDataStorageInternal {
     }
 
     func storeRefreshToken(_ refreshToken: JWT, withExistingPassword password: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
-        guard let userId: String = refreshToken.userId else {
-            completion(.failure(.storage(.noUserIdFoundInRefreshToken)))
-            return
-        }
-
-        let keyIdResult: Result<String, TIMKeychainError> = get(storeID: .keyId(userId))
+        let keyIdResult: Result<String, TIMKeychainError> = get(storeID: .keyId(refreshToken.userId))
         switch keyIdResult {
         case .failure(let keychainError):
             completion(.failure(.storage(.encryptedStorageFailed(.keychainFailed(keychainError)))))
         case .success(let keyId):
             TIMEncryptedStorage.store(
-                id: TIMDataStorageStoreId.refreshToken(userId).storeID(),
-                data: refreshToken.convert(),
+                id: TIMDataStorageStoreId.refreshToken(refreshToken.userId).storeID(),
+                data: refreshToken.token.convert(),
                 keyId: keyId,
                 secret: password) { (result) in
                 switch result {
                 case .success:
-                    self.addAvailableUserId(userId: userId)
+                    self.addAvailableUserId(userId: refreshToken.userId)
                     completion(.success(Void()))
                 case .failure(let error):
                     completion(.failure(.storage(.encryptedStorageFailed(error))))
@@ -207,25 +199,20 @@ extension TIMDataStorageInternal {
     }
 
     func storeRefreshToken(_ refreshToken: JWT, withNewPassword newPassword: String, completion: @escaping (Result<TIMESKeyCreationResult, TIMError>) -> Void) {
-        guard let userId: String = refreshToken.userId else {
-            completion(.failure(.storage(.noUserIdFoundInRefreshToken)))
-            return
-        }
-
         TIMEncryptedStorage.storeWithNewKey(
-            id: TIMDataStorageStoreId.refreshToken(userId).storeID(),
-            data: refreshToken.convert(),
+            id: TIMDataStorageStoreId.refreshToken(refreshToken.userId).storeID(),
+            data: refreshToken.token.convert(),
             secret: newPassword,
             completion: { (result) in
                 switch result {
                 case .success(let keyCreationData):
-                    self.disableCurrentBiometricAccess(userId: userId)
-                    let storeResult: Result<Void, TIMKeychainError> = self.store(data: keyCreationData.keyId, storeID: .keyId(userId))
+                    self.disableCurrentBiometricAccess(userId: refreshToken.userId)
+                    let storeResult: Result<Void, TIMKeychainError> = self.store(data: keyCreationData.keyId, storeID: .keyId(refreshToken.userId))
                     switch storeResult {
                     case .failure(let keychainError):
                         completion(.failure(.storage(.encryptedStorageFailed(.keychainFailed(keychainError)))))
                     case .success:
-                        self.addAvailableUserId(userId: userId)
+                        self.addAvailableUserId(userId: refreshToken.userId)
                         completion(result.mapError({ .storage(.encryptedStorageFailed($0)) }))
                     }
                 case .failure:
