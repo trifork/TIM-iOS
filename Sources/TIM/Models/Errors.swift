@@ -28,6 +28,7 @@ public enum TIMAuthError: Error, LocalizedError {
     case refreshTokenExpired
     case appAuthFailed(Error?)
     case safariViewControllerCancelled
+    case failedToGetRequiredDataInToken
 
     public var errorDescription: String? {
         switch self {
@@ -49,6 +50,8 @@ public enum TIMAuthError: Error, LocalizedError {
             return "Something went wrong in the AppAuth framework: \(error?.localizedDescription ?? "nil")"
         case .safariViewControllerCancelled:
             return "The user cancelled OpenID connect login via SafariViewController"
+        case .failedToGetRequiredDataInToken:
+            return "TIM did not find the required data (userId) in the token. The 'sub' property must be present in the token!"
         }
     }
 
@@ -86,14 +89,11 @@ public enum TIMAuthError: Error, LocalizedError {
 /// Errors related to storage operations
 public enum TIMStorageError: Error, LocalizedError {
     case encryptedStorageFailed(TIMEncryptedStorageError)
-    case noUserIdFoundInRefreshToken
 
     public var errorDescription: String? {
         switch self {
         case .encryptedStorageFailed(let error):
             return "The encrypted storage failed: \(error.localizedDescription)"
-        case .noUserIdFoundInRefreshToken:
-            return "TIM did not find any userId in the refresh token. The 'sub' property must be present!"
         }
     }
 
@@ -114,8 +114,6 @@ public enum TIMStorageError: Error, LocalizedError {
             default:
                 return false
             }
-        default:
-            return false
         }
     }
 
@@ -142,8 +140,6 @@ public enum TIMStorageError: Error, LocalizedError {
             } else {
                 isKeyServiceError = false
             }
-        default:
-            isKeyServiceError = false
         }
         return isKeyServiceError
     }

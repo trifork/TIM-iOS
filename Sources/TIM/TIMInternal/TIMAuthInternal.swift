@@ -56,26 +56,26 @@ extension TIMAuthInternal {
     }
 
     func loginWithPassword(userId: String, password: String, storeNewRefreshToken: Bool = true, completion: @escaping AccessTokenCallback) {
-        storage.getStoredRefreshToken(userId: userId, password: password) { (result: Result<String, TIMError>) in
+        storage.getStoredRefreshToken(userId: userId, password: password) { (result: Result<JWT, TIMError>) in
             switch result {
-            case .success(let refreshToken):
-                AppAuthController.shared.silentLogin(refreshToken: refreshToken) { (result: Result<JWT, TIMAuthError>) in
+            case .success(let refreshJWT):
+                AppAuthController.shared.silentLogin(refreshToken: refreshJWT) { (result: Result<JWT, TIMAuthError>) in
                     switch result {
-                    case .success(let accessToken):
+                    case .success(let accessJWT):
                         if let newRefreshToken = AppAuthController.shared.refreshToken() {
-                            TIM.logger?.log("Did get access token: %@", accessToken)
+                            TIM.logger?.log("Did get access token: %@", accessJWT.token)
                             if storeNewRefreshToken {
                                 self.storage.storeRefreshToken(newRefreshToken, withExistingPassword: password) { (result) in
                                     switch result {
                                     case .success:
-                                        completion(.success(accessToken))
+                                        completion(.success(accessJWT))
                                     case .failure(let error):
                                         TIM.logger?.log("Failed to store refresh token after silent login: %@", error.localizedDescription)
                                         completion(.failure(error))
                                     }
                                 }
                             } else {
-                                completion(.success(accessToken))
+                                completion(.success(accessJWT))
                             }
                         } else {
                             TIM.logger?.log("Failed to get access and refresh token via silent login.")
@@ -101,7 +101,7 @@ extension TIMAuthInternal {
                     switch result {
                     case .success(let accessToken):
                         if let newRefreshToken = AppAuthController.shared.refreshToken() {
-                            TIM.logger?.log("Did get access token: %@", accessToken)
+                            TIM.logger?.log("Did get access token: %@", accessToken.token)
                             if storeNewRefreshToken {
                                 self.storage.storeRefreshTokenWithBiometricAccess(
                                     newRefreshToken,
