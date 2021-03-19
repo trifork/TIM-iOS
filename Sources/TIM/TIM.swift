@@ -26,7 +26,9 @@ public final class TIM {
     /// Handles all authentication through OpenID Connect (AppAuth).
     ///
     /// This also know the storage namespace and will load and store things.
-    public static let auth: TIMAuth = TIMAuthInternal(dataStorage: internalStorage)
+    public static let auth: TIMAuth = TIMAuthInternal(dataStorage: internalStorage, openIdController: openIdController)
+
+    private static let openIdController: OpenIDConnectController = AppAuthController()
 
     /// Setup of the `TIM` class. This should be called before any other function is called on this class.
     /// - Parameters:
@@ -34,7 +36,7 @@ public final class TIM {
     ///   - keyServiceConfiguration: The configuration of the TIM KeyService
     ///   - customLogger: An optional custom logger for logging messages internally from `TIM`. Set to `nil` to disable logging.
     public static func configure(configuration: TIMConfiguration, customLogger: TIMLoggerProtocol? = TIMLogger()) {
-        AppAuthController.shared.configure(configuration.oidcConfiguration)
+        openIdController.configure(configuration.oidcConfiguration)
         TIMEncryptedStorage.configure(
             keyServiceConfiguration: configuration.keyServiceConfiguration,
             encryptionMethod: configuration.encryptionMethod
@@ -189,6 +191,16 @@ public protocol TIMDataStorage {
     ///   - userId: The `userId` for the refresh token.
     func enableBiometricAccessForRefreshToken(longSecret: String, userId: String) -> Result<Void, TIMError>
 
+
+    /// Stores a refresh token using long secret instead of password.
+    /// It is unlikely, that you will need to use this method, unless you are doing something custom. TIM does use this method internally to keep refresh tokens up-to-date even when logging in with biometric access.
+    ///
+    /// - Parameters:
+    ///   - refreshToken: The refresh token.
+    ///   - longSecret: The long secret (can be obtained via biometric access)
+    ///   - completion: Invoked when the refresh token is stored or when the operation fails.
+    func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String, completion: @escaping (Result<Void, TIMError>) -> Void)
+
     // MARK: - Combine wrappers
     #if canImport(Combine)
     /// Combine wrapper of `getStoredRefreshToken(userId:password:completion:)`
@@ -210,5 +222,9 @@ public protocol TIMDataStorage {
     /// Combine wrapper of `enableBiometricAccessForRefreshToken(password:userId:completion:)`
     @available(iOS 13, *)
     func enableBiometricAccessForRefreshToken(password: String, userId: String) -> Future<Void, TIMError>
+
+    /// Combine wrapper of `storeRefreshTokenWithLongSecret(_:longSecret:completion:)`
+    @available(iOS 13, *)
+    func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String) -> Future<Void, TIMError>
     #endif
 }

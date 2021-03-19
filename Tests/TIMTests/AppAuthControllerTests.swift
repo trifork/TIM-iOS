@@ -4,6 +4,7 @@ import AppAuth
 
 final class AppAuthControllerTests: XCTestCase {
     func testCreateAuthState() {
+        let appAuth = AppAuthController()
         let clientId = "test-client-id"
         let redirectUri = URL(string: "test-redirect://")!
         let scope = "test-scope"
@@ -15,14 +16,14 @@ final class AppAuthControllerTests: XCTestCase {
             redirectUri: redirectUri,
             scopes: [ scope ]
         )
-        AppAuthController.shared.configure(credentials)
+        appAuth.configure(credentials)
 
         let configuration = OIDServiceConfiguration(
             authorizationEndpoint: URL(string: "auth-test-url://")!,
             tokenEndpoint: URL(string: "token-test-url://")!
         )
 
-        let authResponse = AppAuthController.shared.createRestoreFakeLastAuthorizationResponse(configuration: configuration)
+        let authResponse = appAuth.createRestoreFakeLastAuthorizationResponse(configuration: configuration)
         let tokenRequest = OIDTokenRequest(
             configuration: configuration,
             grantType: "grant",

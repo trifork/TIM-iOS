@@ -35,7 +35,6 @@ private enum TIMDataStorageStoreId {
 }
 
 final class TIMDataStorageInternal : TIMDataStorage {
-
     // MARK: - Private helpers for raw data in key chain (NOT ENCRYPTED!)
     @discardableResult
     private func store<T : DataConvertable>(data: T, storeID: TIMDataStorageStoreId) -> Result<Void, TIMKeychainError> {
@@ -69,23 +68,6 @@ final class TIMDataStorageInternal : TIMDataStorage {
     private func disableCurrentBiometricAccess(userId: String) {
         if let keyId: String = (try? get(storeID: .keyId(userId)).get()) {
             TIMEncryptedStorage.removeLongSecret(keyId: keyId)
-        }
-    }
-
-    // MARK: - Internal
-    func storeRefreshTokenWithBiometricAccess(_ refreshToken: JWT, longSecret: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
-        let keyIdResult: Result<String, TIMKeychainError> = get(storeID: .keyId(refreshToken.userId))
-        switch keyIdResult {
-        case .failure(let keychainError):
-            completion(.failure(.storage(.encryptedStorageFailed(.keychainFailed(keychainError)))))
-        case .success(let keyId):
-            TIMEncryptedStorage.store(
-                id: TIMDataStorageStoreId.refreshToken(refreshToken.userId).storeID(),
-                data: refreshToken.token.convert(),
-                keyId: keyId,
-                longSecret: longSecret) { (result) in
-                completion(result.mapError({ TIMError.storage(.encryptedStorageFailed($0)) }))
-            }
         }
     }
 
@@ -244,6 +226,22 @@ extension TIMDataStorageInternal {
                 .mapError({ TIMError.storage(.encryptedStorageFailed($0)) })
         }
     }
+
+    func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
+        let keyIdResult: Result<String, TIMKeychainError> = get(storeID: .keyId(refreshToken.userId))
+        switch keyIdResult {
+        case .failure(let keychainError):
+            completion(.failure(.storage(.encryptedStorageFailed(.keychainFailed(keychainError)))))
+        case .success(let keyId):
+            TIMEncryptedStorage.store(
+                id: TIMDataStorageStoreId.refreshToken(refreshToken.userId).storeID(),
+                data: refreshToken.token.convert(),
+                keyId: keyId,
+                longSecret: longSecret) { (result) in
+                completion(result.mapError({ TIMError.storage(.encryptedStorageFailed($0)) }))
+            }
+        }
+    }
 }
 
 //MARK: - Combine wrappers
@@ -277,6 +275,12 @@ extension TIMDataStorageInternal {
     func enableBiometricAccessForRefreshToken(password: String, userId: String) -> Future<Void, TIMError> {
         Future { promise in
             self.enableBiometricAccessForRefreshToken(password: password, userId: userId, completion: promise)
+        }
+    }
+
+    func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String) -> Future<Void, TIMError> {
+        Future { promise in
+            self.storeRefreshTokenWithLongSecret(refreshToken, longSecret: longSecret, completion: promise)
         }
     }
 }
