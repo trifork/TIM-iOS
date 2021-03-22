@@ -7,7 +7,6 @@ import SafariServices
 protocol OpenIDConnectController {
     var credentials: TIMOpenIDConfiguration { get }
     var isLoggedIn: Bool { get }
-    func configure(_ credentials: TIMOpenIDConfiguration)
     func createRestoreFakeLastAuthorizationResponse(configuration: OIDServiceConfiguration) -> OIDAuthorizationResponse
     func login(presentingViewController: UIViewController, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?)
     func silentLogin(refreshToken: JWT, completion: @escaping (Result<JWT, TIMAuthError>) -> Void)
@@ -40,7 +39,7 @@ final class AppAuthController: OpenIDConnectController {
         authState != nil
     }
 
-    func configure(_ credentials: TIMOpenIDConfiguration) {
+    init(_ credentials: TIMOpenIDConfiguration) {
         self.credentials = credentials
     }
 

@@ -17,31 +17,67 @@ public final class TIM {
     /// Optional logger. Set to `nil` to stop logging
     public static var logger: TIMLoggerProtocol?
 
-    /// Internal interface
-    private static let internalStorage = TIMDataStorageInternal()
-
     /// Handles all secure storage operations and interfaces with the key service.
-    public static let storage: TIMDataStorage = internalStorage
+    public static var storage: TIMDataStorage {
+        if let storageInstance = _storage {
+            return storageInstance
+        } else {
+            fatalError("You have to call the `configure(configuration:)` method before using TIM.auth!")
+        }
+    }
+    private static var _storage: TIMDataStorage?
 
     /// Handles all authentication through OpenID Connect (AppAuth).
     ///
     /// This also know the storage namespace and will load and store things.
-    public static let auth: TIMAuth = TIMAuthInternal(dataStorage: internalStorage, openIdController: openIdController)
+    public static var auth: TIMAuth {
+        if let authInstance = _auth {
+            return authInstance
+        } else {
+            fatalError("You have to call the `configure(configuration:)` method before using TIM.auth!")
+        }
+    }
+    private static var _auth: TIMAuth?
 
-    private static let openIdController: OpenIDConnectController = AppAuthController()
-
-    /// Setup of the `TIM` class. This should be called before any other function is called on this class.
+    /// Configures the `TIM` class with default instances based on your configuration.
+    /// This should be called before any other function or property is called on this class.
+    ///
+    /// This is the recommended configure method of `TIM`.
+    ///
     /// - Parameters:
-    ///   - openIDCredentials: The configuration of the OpenID Connect server (TIM server)
-    ///   - keyServiceConfiguration: The configuration of the TIM KeyService
+    ///   - configuration: TIMConfiguration
     ///   - customLogger: An optional custom logger for logging messages internally from `TIM`. Set to `nil` to disable logging.
     public static func configure(configuration: TIMConfiguration, customLogger: TIMLoggerProtocol? = TIMLogger()) {
-        openIdController.configure(configuration.oidcConfiguration)
-        TIMEncryptedStorage.configure(
-            keyServiceConfiguration: configuration.keyServiceConfiguration,
+        let encryptedStorage = TIMEncryptedStorage(
+            secureStorage: TIMKeychain(),
+            keyService: TIMKeyService(configuration: configuration.keyServiceConfiguration),
             encryptionMethod: configuration.encryptionMethod
         )
+        let storage = TIMDataStorageInternal(encryptedStorage: encryptedStorage)
+        _auth = TIMAuthInternal(
+            dataStorage: storage,
+            openIdController: AppAuthController(configuration.oidcConfiguration)
+        )
+        _storage = storage
         logger = customLogger ?? TIMLogger()
+    }
+
+    /// Configures the `TIM` class with custom instances of the interfaces.
+    ///
+    /// This can be useful when mocking for testing or other very custom scenarios.
+    ///
+    /// **THIS IS NOT THE USUAL WAY TO CONFIGURE TIM**
+    ///
+    /// See `configure(configuration:)` for the default configuration method.
+    ///
+    /// - Parameters:
+    ///   - dataStorage: The data storage instance to use.
+    ///   - auth: The auth
+    ///   - customLogger: An optional custom logger for logging messages internally from `TIM`. Set to `nil` to disable logging.
+    public static func configure(dataStorage: TIMDataStorage, auth: TIMAuth, customLogger: TIMLoggerProtocol?) {
+        _auth = auth
+        _storage = dataStorage
+        logger = customLogger
     }
 }
 
@@ -71,7 +107,7 @@ public protocol TIMAuth {
 
     /// Performs OAuth login with OpenID Connect by presenting a `SFSafariViewController` on the `presentingViewController`
     ///
-    /// The `refreshToken` property will be available after this, which can be used to encrypt and store it in the keychain by the `store` namespace.
+    /// The `refreshToken` property will be available after this, which can be used to encrypt and store it in the secure store by the `storage` namespace.
     /// - Parameters:
     ///   - presentingViewController: The view controller which the safari view controller should be presented on.
     ///   - completion: Invoked with access token after successful login (or with error)
@@ -136,7 +172,7 @@ public protocol TIMDataStorage {
     func disableBiometricAccessForRefreshToken(userId: String)
 
 
-    /// Clears all keychain data for `userId`
+    /// Clears all securely stored data for `userId`
     /// - Parameter userId: The `userId`.
     func clear(userId: String)
 
@@ -154,7 +190,7 @@ public protocol TIMDataStorage {
     /// Gets a stored refresh token with biometric protection for a `userId`.
     /// - Parameters:
     ///   - userId: The `userId` from the refresh token
-    ///   - completion: Invoked when the refresh token is loaded or the system fails to load it. The result contains the `longSecret`, which was used as secret from the biometric keychain store.
+    ///   - completion: Invoked when the refresh token is loaded or the system fails to load it. The result contains the `longSecret`, which was used as secret from the biometric secure store.
     @available(iOS, deprecated: 13)
     func getStoredRefreshTokenViaBiometric(userId: String, completion: @escaping (Result<BiometricRefreshToken, TIMError>) -> Void)
 
