@@ -7,8 +7,6 @@ final class TIMStorageInternalTests: XCTestCase {
 
     static private let keyServiceBaseUrl = "https://identitymanager.trifork.com"
     private let testRefreshToken: JWTString = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk1MTYyMzkwMjJ9.fzHyQ0D6kSOr-6i4gEiJoOm5UutfqgivtqtXbwaRv1c"
-    static private let getUrl = URL(string: keyServiceBaseUrl)!.appendingPathComponent("/keyservice/v1/key")
-    static private let createUrl = URL(string: keyServiceBaseUrl)!.appendingPathComponent("/keyservice/v1/createkey")
 
 
     override class func setUp() {
@@ -54,10 +52,7 @@ final class TIMStorageInternalTests: XCTestCase {
 
             // Store the refresh token with a new password
             let keyModel = storeRefreshTokenWithNewPassword(dataStorage: storage, refreshToken: self.testRefreshToken, password: "1234")
-            URLSessionStubResults.resultsForUrls[Self.getUrl] = .dataResponse(
-                data: try! JSONEncoder().encode(keyModel),
-                response: HTTPURLResponse(url: Self.getUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            )
+            URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel)
             XCTAssertTrue(storage.availableUserIds.contains(testRefreshToken.userId!)) // Should be accessible as an available user now
 
             // Store an updated refresh token with an existing password.
@@ -81,10 +76,7 @@ final class TIMStorageInternalTests: XCTestCase {
 
             // Store refresh token with new password
             let keyModel = storeRefreshTokenWithNewPassword(dataStorage: storage, refreshToken: self.testRefreshToken, password: "1234")
-            URLSessionStubResults.resultsForUrls[Self.getUrl] = .dataResponse(
-                data: try! JSONEncoder().encode(keyModel),
-                response: HTTPURLResponse(url: Self.getUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            )
+            URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel)
 
             // Get stored refresh token
             let expect = XCTestExpectation(description: "Storage should have returned.")
@@ -108,10 +100,7 @@ final class TIMStorageInternalTests: XCTestCase {
 
             // Store refresh token with new password
             let keyModel = storeRefreshTokenWithNewPassword(dataStorage: storage, refreshToken: self.testRefreshToken, password: "1234")
-            URLSessionStubResults.resultsForUrls[Self.getUrl] = .dataResponse(
-                data: try! JSONEncoder().encode(keyModel),
-                response: HTTPURLResponse(url: Self.getUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            )
+            URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel)
 
             // Enable biometric access
             XCTAssertFalse(storage.hasBiometricAccessForRefreshToken(userId: testRefreshToken.userId!))
@@ -155,10 +144,7 @@ final class TIMStorageInternalTests: XCTestCase {
 
             // Store refresh token with new password
             let keyModel = storeRefreshTokenWithNewPassword(dataStorage: storage, refreshToken: self.testRefreshToken, password: "1234")
-            URLSessionStubResults.resultsForUrls[Self.getUrl] = .dataResponse(
-                data: try! JSONEncoder().encode(keyModel),
-                response: HTTPURLResponse(url: Self.getUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            )
+            URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel)
 
             // Enable biometric access
             XCTAssertFalse(storage.hasBiometricAccessForRefreshToken(userId: testRefreshToken.userId!))
@@ -180,10 +166,7 @@ final class TIMStorageInternalTests: XCTestCase {
 
             // Store refresh token with new password
             let keyModel = storeRefreshTokenWithNewPassword(dataStorage: storage, refreshToken: self.testRefreshToken, password: "1234")
-            URLSessionStubResults.resultsForUrls[Self.getUrl] = .dataResponse(
-                data: try! JSONEncoder().encode(keyModel),
-                response: HTTPURLResponse(url: Self.getUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            )
+            URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel)
 
             let expect = XCTestExpectation(description: "Storage failed to return")
             let jwt = JWT(token: newRefreshToken)!
@@ -206,10 +189,7 @@ final class TIMStorageInternalTests: XCTestCase {
 
             // Store refresh token with new password
             let keyModel = storeRefreshTokenWithNewPassword(dataStorage: storage, refreshToken: self.testRefreshToken, password: "1234")
-            URLSessionStubResults.resultsForUrls[Self.getUrl] = .dataResponse(
-                data: try! JSONEncoder().encode(keyModel),
-                response: HTTPURLResponse(url: Self.getUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            )
+            URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel)
             XCTAssertTrue(storage.hasRefreshToken(userId: testRefreshToken.userId!))
 
             let expect1 = XCTestExpectation(description: "Storage should have returned.")
@@ -250,10 +230,7 @@ final class TIMStorageInternalTests: XCTestCase {
             XCTAssertEqual(2, storage.availableUserIds.count)
 
             // Enable bio for user 1
-            URLSessionStubResults.resultsForUrls[Self.getUrl] = .dataResponse(
-                data: try! JSONEncoder().encode(keyModel1),
-                response: HTTPURLResponse(url: Self.getUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            )
+            URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel1)
             let expect1 = XCTestExpectation(description: "Storage should have returned.")
             storage.enableBiometricAccessForRefreshToken(password: "1234", userId: user1RefreshToken.userId!, completion: { result in
                 switch result {
@@ -281,10 +258,7 @@ final class TIMStorageInternalTests: XCTestCase {
             wait(for: [expect2], timeout: 1.0)
 
             // Get refresh token via bio for user 2 -> This should fail!
-            URLSessionStubResults.resultsForUrls[Self.getUrl] = .dataResponse(
-                data: try! JSONEncoder().encode(keyModel2),
-                response: HTTPURLResponse(url: Self.getUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            )
+            URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel2)
             let expect3 = XCTestExpectation(description: "Bio result never returned for user 2")
             storage.getStoredRefreshTokenViaBiometric(userId: user2RefreshToken.userId!, completion: { result in
                 switch result {
@@ -346,10 +320,7 @@ final class TIMStorageInternalTests: XCTestCase {
             key: "S2JQZVNoVm1ZcTN0Nnc5eQ==",
             longSecret: "longSecret"
         )
-        URLSessionStubResults.resultsForUrls[Self.createUrl] = .dataResponse(
-            data: try! JSONEncoder().encode(createdKeyModel),
-            response: HTTPURLResponse(url: Self.createUrl, statusCode: 200, httpVersion: nil, headerFields: nil)!
-        )
+        URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .createKey, keyModel: createdKeyModel)
         let refreshTokenJwt = JWT(token: refreshToken)!
         let expect = XCTestExpectation(description: "Store refresh token with new password")
         XCTAssertFalse(dataStorage.availableUserIds.contains(refreshTokenJwt.userId))
