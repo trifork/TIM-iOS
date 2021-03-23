@@ -16,7 +16,7 @@ Add this repo to your SPM 📦
 https://github.com/trifork/TIM-iOS
 
 ### Setup configuration
-Before using any function from `TIM` you have to configure the framework by calling the `configure` method (typically you want to do this on app startup):
+Before using any function or property from `TIM` you have to configure the framework by calling the `configure` method (typically you want to do this on app startup):
 
 ```swift
 import TIM
@@ -289,7 +289,7 @@ Other errors should of course still be handled, but can be handled in a more gen
 `TIM` depends on `AppAuth` and `TIMEncryptedStorage` and wraps their use for common use cases (see sections above), such that registering, login and encrypted storage is easy to manage.
 
 #### Storage
-The `TIM.storage: TIMDataStorage` handles all storage operations in terms of encrypted and raw data to the keychain.
+The `TIM.storage: TIMDataStorage` handles all storage operations in terms of encrypted and raw data to a secure storage (default is the iOS Keychain).
 
 This heavily depends on the `TIMEncryptedStorage` package, which communicates with the TIM KeyService, to handle encryption based on a user selected password and biometric access if enabled.
 
@@ -303,6 +303,16 @@ https://github.com/trifork/TIMEncryptedStorage-iOS
 ### AppAuth
 `TIM` depends on `AppAuth` for OpenID Connect operations:
 https://github.com/openid/AppAuth-iOS
+
+## Testing
+
+`TIM` is designed to be testable, such that you can mock the parts of the framework, that you would like to. The framework contains a custom `configure` method, which allows you to fully customise the inner implementations of the framework:
+```swift
+TIM.configure(dataStorage: TIMDataStorage, auth: TIMAuth, customLogger: TIMLoggerProtocol?)
+```
+Every dependency in `TIM` is build upon protocols, such that you can implement your own mock-classes for testing. 
+
+⚠️ **NOTE:** This `configure` method allows you to change the `TIM` behaviour. We strongly recommend that you only use the above `configure` method for testing!
 
 ---
 
