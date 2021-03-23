@@ -1,5 +1,7 @@
 # Trifork Identity Manager iOS
 
+![iOS-9.0](https://img.shields.io/static/v1?logo=apple&label=iOS&message=9.0%2B&color=orange&style=for-the-badge)
+
 This framework is designed for [Trifork Identity Manager](http://identitymanager.trifork.com/).
 
 ## Example
