@@ -22,7 +22,7 @@ public final class TIM {
         if let storageInstance = _storage {
             return storageInstance
         } else {
-            fatalError("You have to call the `configure(configuration:)` method before using TIM.auth!")
+            fatalError("You have to call the `configure(configuration:)` method before using TIM.storage!")
         }
     }
     private static var _storage: TIMDataStorage?
