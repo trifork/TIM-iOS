@@ -44,10 +44,16 @@ public final class TIM {
     ///
     /// This is the recommended configure method of `TIM`.
     ///
+    /// **NOTE:** You should only call this method once. If called more than once, it will cause a `fatalError`. You can use the other configuration method for testing, which allows multiple invocations.
+    ///
     /// - Parameters:
     ///   - configuration: TIMConfiguration
     ///   - customLogger: An optional custom logger for logging messages internally from `TIM`. Set to `nil` to disable logging.
     public static func configure(configuration: TIMConfiguration, customLogger: TIMLoggerProtocol? = TIMLogger()) {
+        guard _auth == nil && _storage == nil else {
+            fatalError("🛑 You shouldn't configure TIM more than once!")
+        }
+
         let encryptedStorage = TIMEncryptedStorage(
             secureStorage: TIMKeychain(),
             keyService: TIMKeyService(configuration: configuration.keyServiceConfiguration),
