@@ -39,6 +39,11 @@ public final class TIM {
     }
     private static var _auth: TIMAuth?
 
+    /// Indicates whether `TIM` was configured or not.
+    public static var isConfigured: Bool {
+        _auth != nil && _storage != nil
+    }
+
     /// Configures the `TIM` class with default instances based on your configuration.
     /// This should be called before any other function or property is called on this class.
     ///
@@ -65,7 +70,7 @@ public final class TIM {
             openIdController: AppAuthController(configuration.oidcConfiguration)
         )
         _storage = storage
-        logger = customLogger ?? TIMLogger()
+        logger = customLogger
     }
 
     /// Configures the `TIM` class with custom instances of the interfaces.
