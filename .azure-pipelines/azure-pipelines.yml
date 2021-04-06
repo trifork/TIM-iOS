@@ -6,6 +6,7 @@ jobs:
   strategy:
     maxParallel: 10
     matrix:
+      # Previous iOS versions requires previous Xcode verisons, which isn't supported by TIM
       ios14:
         IMAGE_NAME: 'macos-10.15'
         XCODE_DEVELOPER_PATH: /Applications/Xcode_12.4.app
@@ -13,5 +14,11 @@ jobs:
   pool:
     vmImage: $(IMAGE_NAME)
   steps:
+  - script: sudo xcode-select -switch $(XCODE_DEVELOPER_PATH)
+    displayName: Select Xcode version
+  
+  - script: xcodebuild -version
+    displayName: Xcode version
+    
   - script: xcodebuild -scheme TIM -sdk iphonesimulator -destination 'platform=iOS Simulator,name=$(IOS_SIMULATORS)' test
     displayName: 'xcodebuild test'

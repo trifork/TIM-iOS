@@ -7,27 +7,29 @@ import Combine
 
 class TIMAuthInternal : TIMAuth {
 
-    private let storage: TIMDataStorageInternal
+    private let storage: TIMDataStorage
+    private let openIdController: OpenIDConnectController
 
-    init(dataStorage: TIMDataStorageInternal) {
+    init(dataStorage: TIMDataStorage, openIdController: OpenIDConnectController) {
         self.storage = dataStorage
+        self.openIdController = openIdController
     }
 
     var isLoggedIn: Bool {
-        return AppAuthController.shared.isLoggedIn
+        return openIdController.isLoggedIn
     }
 
     var refreshToken: JWT? {
-        return AppAuthController.shared.refreshToken()
+        return openIdController.refreshToken()
     }
 
     func logout() {
-        AppAuthController.shared.logout()
+        openIdController.logout()
     }
 
     @discardableResult
     func handleRedirect(url: URL) -> Bool {
-        AppAuthController.shared.handleRedirect(url: url)
+        openIdController.handleRedirect(url: url)
     }
 }
 
@@ -38,20 +40,22 @@ class TIMAuthInternal : TIMAuth {
 @available(iOS, deprecated: 13)
 extension TIMAuthInternal {
     func accessToken(_ completion: @escaping AccessTokenCallback) {
-        AppAuthController.shared.accessToken { (result: Result<JWT, TIMAuthError>) in
+        openIdController.accessToken(forceRefresh: false) { (result: Result<JWT, TIMAuthError>) in
             completion(result.mapError({ TIMError.auth($0) }))
         }
     }
 
     func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback) {
-        AppAuthController.shared.login(
+        openIdController.login(
             presentingViewController: presentingViewController,
             completion: { (result: Result<JWT, TIMAuthError>) in
                 completion(result.mapError({ TIMError.auth($0) }))
             },
             didCancel: {
                 completion(.failure(TIMError.auth(.safariViewControllerCancelled)))
-            }
+            },
+            willPresentSafariViewController: nil,
+            shouldAnimate: nil
         )
     }
 
@@ -59,10 +63,10 @@ extension TIMAuthInternal {
         storage.getStoredRefreshToken(userId: userId, password: password) { (result: Result<JWT, TIMError>) in
             switch result {
             case .success(let refreshJWT):
-                AppAuthController.shared.silentLogin(refreshToken: refreshJWT) { (result: Result<JWT, TIMAuthError>) in
+                self.openIdController.silentLogin(refreshToken: refreshJWT) { (result: Result<JWT, TIMAuthError>) in
                     switch result {
                     case .success(let accessJWT):
-                        if let newRefreshToken = AppAuthController.shared.refreshToken() {
+                        if let newRefreshToken = self.openIdController.refreshToken() {
                             TIM.logger?.log("Did get access token: %@", accessJWT.token)
                             if storeNewRefreshToken {
                                 self.storage.storeRefreshToken(newRefreshToken, withExistingPassword: password) { (result) in
@@ -97,13 +101,13 @@ extension TIMAuthInternal {
         storage.getStoredRefreshTokenViaBiometric(userId: userId) { (result) in
             switch result {
             case .success(let bioResult):
-                AppAuthController.shared.silentLogin(refreshToken: bioResult.refreshToken) { (result: Result<JWT, TIMAuthError>) in
+                self.openIdController.silentLogin(refreshToken: bioResult.refreshToken) { (result: Result<JWT, TIMAuthError>) in
                     switch result {
                     case .success(let accessToken):
-                        if let newRefreshToken = AppAuthController.shared.refreshToken() {
+                        if let newRefreshToken = self.openIdController.refreshToken() {
                             TIM.logger?.log("Did get access token: %@", accessToken.token)
                             if storeNewRefreshToken {
-                                self.storage.storeRefreshTokenWithBiometricAccess(
+                                self.storage.storeRefreshTokenWithLongSecret(
                                     newRefreshToken,
                                     longSecret: bioResult.longSecret) { (result) in
                                     switch result {

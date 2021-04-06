@@ -2,35 +2,30 @@ import UIKit
 import AppAuth
 import SafariServices
 
-final class AppAuthController {
-    static let shared = AppAuthController()
+/// Protocol for OpenID Connect dependency.
+/// This protocol is only for test purposes and has no function for `TIM` it self.
+protocol OpenIDConnectController {
+    var isLoggedIn: Bool { get }
+    func login(presentingViewController: UIViewController, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?)
+    func silentLogin(refreshToken: JWT, completion: @escaping (Result<JWT, TIMAuthError>) -> Void)
+    func accessToken(forceRefresh: Bool, _ completion: @escaping (Result<JWT, TIMAuthError>) -> Void)
+    func refreshToken() -> JWT?
+    func logout()
+    func handleRedirect(url: URL) -> Bool
+}
 
+/// AppAuth implementation of `OpenIDConnectController` protocol.
+final class AppAuthController: OpenIDConnectController {
     private var currentAuthorizationFlow: OIDExternalUserAgentSession? = nil
 
     private var authState: OIDAuthState?
-
-    private var _credentials: TIMOpenIDConfiguration?
-    private (set) var credentials: TIMOpenIDConfiguration {
-        get {
-            guard let cred = _credentials else {
-                fatalError("No credentials were configured for AppAuthController.")
-            }
-            return cred
-        }
-        set {
-            _credentials = newValue
-        }
-    }
+    private let credentials: TIMOpenIDConfiguration
 
     var isLoggedIn: Bool {
         authState != nil
     }
 
-    private init() {
-
-    }
-
-    func configure(_ credentials: TIMOpenIDConfiguration) {
+    init(_ credentials: TIMOpenIDConfiguration) {
         self.credentials = credentials
     }
 
@@ -121,7 +116,7 @@ final class AppAuthController {
                     switch authResult {
                     case .success(let state):
                         self.authState = state
-                        self.accessToken(completion)
+                        self.accessToken(forceRefresh: false, completion)
                     case .failure(let error):
                         DispatchQueue.main.async {
                             completion(.failure(error))
@@ -182,7 +177,7 @@ final class AppAuthController {
         }
     }
 
-    func accessToken(forceRefresh: Bool = false, _ completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
+    func accessToken(forceRefresh: Bool, _ completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
         guard let authState = self.authState else {
             completion(.failure(TIMAuthError.authStateNil))
             return

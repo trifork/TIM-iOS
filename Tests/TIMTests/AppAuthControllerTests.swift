@@ -7,22 +7,21 @@ final class AppAuthControllerTests: XCTestCase {
         let clientId = "test-client-id"
         let redirectUri = URL(string: "test-redirect://")!
         let scope = "test-scope"
-        let refreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0Ijo5NTE2MjM5MDIyfQ.uABcDgaLYZTcO8PbD317GCngfBBYmxwg1DKDZU3YBZ4"
-
         let credentials = TIMOpenIDConfiguration(
             issuer: URL(string: "test-issuer://")!,
             clientId: clientId,
             redirectUri: redirectUri,
             scopes: [ scope ]
         )
-        AppAuthController.shared.configure(credentials)
+        let appAuth = AppAuthController(credentials)
+        let refreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0Ijo5NTE2MjM5MDIyfQ.uABcDgaLYZTcO8PbD317GCngfBBYmxwg1DKDZU3YBZ4"
 
         let configuration = OIDServiceConfiguration(
             authorizationEndpoint: URL(string: "auth-test-url://")!,
             tokenEndpoint: URL(string: "token-test-url://")!
         )
 
-        let authResponse = AppAuthController.shared.createRestoreFakeLastAuthorizationResponse(configuration: configuration)
+        let authResponse = appAuth.createRestoreFakeLastAuthorizationResponse(configuration: configuration)
         let tokenRequest = OIDTokenRequest(
             configuration: configuration,
             grantType: "grant",

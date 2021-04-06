@@ -109,7 +109,7 @@ public enum TIMStorageError: Error, LocalizedError {
         switch self {
         case .encryptedStorageFailed(let storageError):
             switch storageError {
-            case .keychainFailed(let keychainError) where keychainError == .authenticationFailedForData:
+            case .secureStorageFailed(let secureStorageError) where secureStorageError == .authenticationFailedForData:
                 return true
             default:
                 return false
