@@ -53,25 +53,41 @@ public protocol TIMAuth {
     ///   - completion: Invoked with the access token when the login was successful or an error if it fails.
     @available(iOS, deprecated: 13)
     func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool, completion: @escaping AccessTokenCallback)
+}
 
-    // MARK: - Combine wrappers
-
-    #if canImport(Combine)
+#if canImport(Combine)
+extension TIMAuth {
     /// Combine wrapper of `accessToken(_:)`
     @available(iOS 13, *)
-    func accessToken() -> Future<JWT, TIMError>
+    func accessToken() -> Future<JWT, TIMError> {
+        Future { promise in
+            self.accessToken(promise)
+        }
+    }
 
     /// Combine wrapper of `performOpenIDConnectLogin(presentingViewController:completion:)`
     @available(iOS 13, *)
-    func performOpenIDConnectLogin(presentingViewController: UIViewController) -> Future<JWT, TIMError>
+    func performOpenIDConnectLogin(presentingViewController: UIViewController) -> Future<JWT, TIMError> {
+        Future { promise in
+            self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: promise)
+        }
+    }
 
     /// Combine wrapper of `loginWithPassword(userId:password:storeNewRefreshToken:completion:)`
     @available(iOS 13, *)
-    func loginWithPassword(userId: String, password: String, storeNewRefreshToken: Bool) -> Future<JWT, TIMError>
+    func loginWithPassword(userId: String, password: String, storeNewRefreshToken: Bool) -> Future<JWT, TIMError> {
+        Future { promise in
+            self.loginWithPassword(userId: userId, password: password, storeNewRefreshToken: storeNewRefreshToken, completion: promise)
+        }
+    }
 
     /// Combine wrapper of `loginWithBiometricId(userId:storeNewRefreshToken:completion:)`
     @available(iOS 13, *)
-    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool) -> Future<JWT, TIMError>
-    #endif
+    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool) -> Future<JWT, TIMError> {
+        Future { promise in
+            self.loginWithBiometricId(userId: userId, storeNewRefreshToken: storeNewRefreshToken, completion: promise)
+        }
+    }
 }
+#endif
 

@@ -140,32 +140,3 @@ extension TIMAuthInternal {
     }
 }
 
-//MARK: - Combine wrappers
-#if canImport(Combine)
-@available(iOS 13, *)
-extension TIMAuthInternal {
-    func accessToken() -> Future<JWT, TIMError> {
-        Future { promise in
-            self.accessToken(promise)
-        }
-    }
-
-    func performOpenIDConnectLogin(presentingViewController: UIViewController) -> Future<JWT, TIMError> {
-        Future { promise in
-            self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: promise)
-        }
-    }
-
-    func loginWithPassword(userId: String, password: String, storeNewRefreshToken: Bool) -> Future<JWT, TIMError> {
-        Future { promise in
-            self.loginWithPassword(userId: userId, password: password, completion: promise)
-        }
-    }
-
-    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool) -> Future<JWT, TIMError> {
-        Future { promise in
-            self.loginWithBiometricId(userId: userId, storeNewRefreshToken: storeNewRefreshToken, completion: promise)
-        }
-    }
-}
-#endif

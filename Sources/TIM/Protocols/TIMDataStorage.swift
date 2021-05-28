@@ -88,31 +88,45 @@ public protocol TIMDataStorage {
     ///   - longSecret: The long secret (can be obtained via biometric access)
     ///   - completion: Invoked when the refresh token is stored or when the operation fails.
     func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String, completion: @escaping (Result<Void, TIMError>) -> Void)
-
-    // MARK: - Combine wrappers
-    #if canImport(Combine)
-    /// Combine wrapper of `getStoredRefreshToken(userId:password:completion:)`
-    @available(iOS 13, *)
-    func getStoredRefreshToken(userId: String, password: String) -> Future<JWT, TIMError>
-
-    /// Combine wrapper of `getStoredRefreshTokenViaBiometric(userId:completion:`
-    @available(iOS 13, *)
-    func getStoredRefreshTokenViaBiometric(userId: String) -> Future<BiometricRefreshToken, TIMError>
-
-    /// Combine wrapper of `storeRefreshToken(_:withExistingPassword:completion:)`
-    @available(iOS 13, *)
-    func storeRefreshToken(_ refreshToken: JWT, withExistingPassword password: String) -> Future<Void, TIMError>
-
-    /// Combine wrapper of `storeRefreshToken(_:withNewPassword:completion:)`
-    @available(iOS 13, *)
-    func storeRefreshToken(_ refreshToken: JWT, withNewPassword newPassword: String) -> Future<TIMESKeyCreationResult, TIMError>
-
-    /// Combine wrapper of `enableBiometricAccessForRefreshToken(password:userId:completion:)`
-    @available(iOS 13, *)
-    func enableBiometricAccessForRefreshToken(password: String, userId: String) -> Future<Void, TIMError>
-
-    /// Combine wrapper of `storeRefreshTokenWithLongSecret(_:longSecret:completion:)`
-    @available(iOS 13, *)
-    func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String) -> Future<Void, TIMError>
-    #endif
 }
+
+#if canImport(Combine)
+@available(iOS 13, *)
+extension TIMDataStorage {
+    func getStoredRefreshToken(userId: String, password: String) -> Future<JWT, TIMError> {
+        Future { promise in
+            self.getStoredRefreshToken(userId: userId, password: password, completion: promise)
+        }
+    }
+
+    func getStoredRefreshTokenViaBiometric(userId: String) -> Future<BiometricRefreshToken, TIMError> {
+        Future { promise in
+            self.getStoredRefreshTokenViaBiometric(userId: userId, completion: promise)
+        }
+    }
+
+    func storeRefreshToken(_ refreshToken: JWT, withExistingPassword password: String) -> Future<Void, TIMError> {
+        Future { promise in
+            self.storeRefreshToken(refreshToken, withExistingPassword: password, completion: promise)
+        }
+    }
+
+    func storeRefreshToken(_ refreshToken: JWT, withNewPassword newPassword: String) -> Future<TIMESKeyCreationResult, TIMError> {
+        Future { promise in
+            self.storeRefreshToken(refreshToken, withNewPassword: newPassword, completion: promise)
+        }
+    }
+
+    func enableBiometricAccessForRefreshToken(password: String, userId: String) -> Future<Void, TIMError> {
+        Future { promise in
+            self.enableBiometricAccessForRefreshToken(password: password, userId: userId, completion: promise)
+        }
+    }
+
+    func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String) -> Future<Void, TIMError> {
+        Future { promise in
+            self.storeRefreshTokenWithLongSecret(refreshToken, longSecret: longSecret, completion: promise)
+        }
+    }
+}
+#endif
