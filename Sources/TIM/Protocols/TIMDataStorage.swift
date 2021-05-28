@@ -92,7 +92,7 @@ public protocol TIMDataStorage {
 
 #if canImport(Combine)
 @available(iOS 13, *)
-extension TIMDataStorage {
+public extension TIMDataStorage {
     func getStoredRefreshToken(userId: String, password: String) -> Future<JWT, TIMError> {
         Future { promise in
             self.getStoredRefreshToken(userId: userId, password: password, completion: promise)

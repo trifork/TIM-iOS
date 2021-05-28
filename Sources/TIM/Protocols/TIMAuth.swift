@@ -68,7 +68,7 @@ public protocol TIMAuth {
 }
 
 #if canImport(Combine)
-extension TIMAuth {
+public extension TIMAuth {
     /// Combine wrapper of `accessToken(_:)`
     @available(iOS 13, *)
     func accessToken() -> Future<JWT, TIMError> {
