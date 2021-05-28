@@ -9,10 +9,12 @@ class TIMAuthInternal : TIMAuth {
 
     private let storage: TIMDataStorage
     private let openIdController: OpenIDConnectController
+    let backgroundMonitor: TIMAppBackgroundMonitor
 
-    init(dataStorage: TIMDataStorage, openIdController: OpenIDConnectController) {
+    init(dataStorage: TIMDataStorage, openIdController: OpenIDConnectController, backgroundMonitor: TIMAppBackgroundMonitor) {
         self.storage = dataStorage
         self.openIdController = openIdController
+        self.backgroundMonitor = backgroundMonitor
     }
 
     var isLoggedIn: Bool {

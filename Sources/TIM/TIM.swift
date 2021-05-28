@@ -62,7 +62,8 @@ public final class TIM {
         let storage = TIMDataStorageInternal(encryptedStorage: encryptedStorage)
         _auth = TIMAuthInternal(
             dataStorage: storage,
-            openIdController: AppAuthController(configuration.oidcConfiguration)
+            openIdController: AppAuthController(configuration.oidcConfiguration),
+            backgroundMonitor: TIMAppBackgroundMonitorInternal()
         )
         _storage = storage
         logger = customLogger

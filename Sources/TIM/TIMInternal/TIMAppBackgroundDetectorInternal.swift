@@ -1,0 +1,69 @@
+import UIKit
+
+final class TIMAppBackgroundMonitorInternal : TIMAppBackgroundMonitor {
+    private (set) var timeoutDurationSeconds: TimeInterval?
+    private (set) var backgroundTimestamp: Date?
+    private var handleTimeoutEvent: (() -> Void)?
+
+    deinit {
+        disable()
+    }
+
+    func enable(durationSeconds: TimeInterval, handleTimeout: @escaping () -> Void) {
+        timeoutDurationSeconds = durationSeconds
+        handleTimeoutEvent = handleTimeout
+        subscribeForEvents()
+    }
+
+    func disable() {
+        handleTimeoutEvent = nil
+        timeoutDurationSeconds = nil
+        unsubscribeForEvents()
+    }
+
+    private func subscribeForEvents() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidResignActive),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+    }
+
+    private func unsubscribeForEvents() {
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+    }
+
+    @objc
+    private func appDidBecomeActive() {
+        guard  let timeoutDurationSeconds = timeoutDurationSeconds,
+               let backgroundTimestamp = backgroundTimestamp else {
+            return
+        }
+        if -backgroundTimestamp.timeIntervalSinceNow > timeoutDurationSeconds {
+            handleTimeoutEvent?()
+            self.backgroundTimestamp = nil // Reset
+        }
+    }
+
+    @objc
+    private func appDidResignActive() {
+        backgroundTimestamp = Date()
+    }
+}

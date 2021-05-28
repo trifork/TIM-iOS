@@ -21,7 +21,8 @@ final class TIMAuthInternalTests: XCTestCase {
         ))
     let auth = TIMAuthInternal(
         dataStorage: storage,
-        openIdController: AppAuthControllerMock()
+        openIdController: AppAuthControllerMock(),
+        backgroundMonitor: TIMAppBackgroundMonitorInternal()
     )
 
     override class func setUp() {
