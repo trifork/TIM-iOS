@@ -9,7 +9,7 @@ class TIMAuthInternal : TIMAuth {
 
     private let storage: TIMDataStorage
     private let openIdController: OpenIDConnectController
-    let backgroundMonitor: TIMAppBackgroundMonitor
+    private let backgroundMonitor: TIMAppBackgroundMonitor
 
     init(dataStorage: TIMDataStorage, openIdController: OpenIDConnectController, backgroundMonitor: TIMAppBackgroundMonitor) {
         self.storage = dataStorage
@@ -137,6 +137,17 @@ extension TIMAuthInternal {
                 completion(.failure(error))
             }
         }
+    }
+
+    func enableBackgroundTimeout(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void) {
+        backgroundMonitor.enable(durationSeconds: durationSeconds, timeoutHandler: { [weak self] in
+            self?.logout()
+            timeoutHandler()
+        })
+    }
+
+    func disableBackgroundTimeout() {
+        backgroundMonitor.disable()
     }
 }
 

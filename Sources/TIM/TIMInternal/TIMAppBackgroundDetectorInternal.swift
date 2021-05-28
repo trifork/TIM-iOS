@@ -9,9 +9,10 @@ final class TIMAppBackgroundMonitorInternal : TIMAppBackgroundMonitor {
         disable()
     }
 
-    func enable(durationSeconds: TimeInterval, handleTimeout: @escaping () -> Void) {
+    func enable(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void) {
+        disable()
         timeoutDurationSeconds = durationSeconds
-        handleTimeoutEvent = handleTimeout
+        handleTimeoutEvent = timeoutHandler
         subscribeForEvents()
     }
 

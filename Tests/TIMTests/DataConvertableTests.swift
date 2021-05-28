@@ -20,10 +20,4 @@ final class DataConvertableTests: XCTestCase {
         let set = Set<String>.convert(data: data)
         XCTAssertEqual(set, ["1", "2"])
     }
-
-    static var allTests = [
-        ("testString", testString),
-        ("testTimeInterval", testTimeInterval),
-        ("testStringSet", testStringSet)
-    ]
 }

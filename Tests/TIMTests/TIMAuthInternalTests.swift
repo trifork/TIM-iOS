@@ -171,6 +171,27 @@ final class TIMAuthInternalTests: XCTestCase {
         }
         wait(for: [expect2], timeout: 1.0)
     }
+
+    func testBackgroundTimeout() {
+        performInitialLogin()
+        XCTAssertTrue(auth.isLoggedIn)
+
+        let expect = XCTestExpectation()
+        auth.enableBackgroundTimeout(durationSeconds: 1) {
+            XCTAssertFalse(self.auth.isLoggedIn)
+            expect.fulfill()
+        }
+
+        // Go to background
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+
+        // Wait for 2 seconds and return to foreground
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
+            NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        }
+        wait(for: [expect], timeout: 5.0)
+        XCTAssertFalse(self.auth.isLoggedIn)
+    }
     
 
     private func performInitialLogin() {

@@ -11,7 +11,7 @@ public protocol TIMAppBackgroundMonitor {
     /// - Parameters:
     ///   - durationSeconds: The duration (seconds) the app may be in the background. When this value is exceeded it will invoke "handleTimeout".
     ///   - handleTimeout: The function that is invoked when the timeout occurs.
-    func enable(durationSeconds: TimeInterval, handleTimeout: @escaping () -> Void)
+    func enable(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void)
 
     /// Disables the background duration detection.
     func disable()

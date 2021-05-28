@@ -53,6 +53,18 @@ public protocol TIMAuth {
     ///   - completion: Invoked with the access token when the login was successful or an error if it fails.
     @available(iOS, deprecated: 13)
     func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool, completion: @escaping AccessTokenCallback)
+
+
+    /// Enables timeout feature for when the app is in the background. The timeout will clear all current user session data within `TIM`.
+    /// The timeoutHandler will be invoked when the app becomes active, iff the app has been in the background longer than the specified duration.
+    /// - Parameters:
+    ///   - durationSeconds: The duration in seconds to timeout for.
+    ///   - timeoutHandler: A handler
+    @available(iOS, deprecated: 13)
+    func enableBackgroundTimeout(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void)
+
+    /// Disables the background timeout
+    func disableBackgroundTimeout()
 }
 
 #if canImport(Combine)
@@ -86,6 +98,16 @@ extension TIMAuth {
     func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool) -> Future<JWT, TIMError> {
         Future { promise in
             self.loginWithBiometricId(userId: userId, storeNewRefreshToken: storeNewRefreshToken, completion: promise)
+        }
+    }
+
+    /// Combine wrapper of `enableBackgroundTimeout(durationSeconds:timeoutHandler:)`
+    @available(iOS 13, *)
+    func enableBackgroundTimeout(durationSeconds: TimeInterval) -> Future<Void, Never> {
+        Future { promise in
+            self.enableBackgroundTimeout(durationSeconds: durationSeconds) {
+                promise(.success(Void()))
+            }
         }
     }
 }
