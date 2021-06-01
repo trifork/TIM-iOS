@@ -250,7 +250,7 @@ You can configure TIM to monitor the time the app has been in the background and
     4. TIM automatically calls logout, which invalidates the current session and invokes the timeout callback.
     
 ```swift
-auth.enableBackgroundTimeout(durationSeconds: 3600 * 5) {
+TIM.auth.enableBackgroundTimeout(durationSeconds: 60 * 5) {
     // Handle the user log out event, e.g. present login screen.
 }
 ```
