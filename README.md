@@ -241,6 +241,20 @@ TIM.auth.logout() // Logout of current session
 TIM.storage.clear(userId: theUserId) // Delete the stored user data
 ```
 
+### 8. Enable background timeout
+You can configure TIM to monitor the time the app has been in the background and make it log out automatically if the desired duration is exceeded.
+
+    1. The user logs in (background monitor timeout is set to 5 minutes)
+    2. The user sends the app to the background
+    3. The user opens the app after 6 minutes
+    4. TIM automatically calls logout, which invalidates the current session and invokes the timeout callback.
+    
+```swift
+TIM.auth.enableBackgroundTimeout(durationSeconds: 60 * 5) {
+    // Handle the user log out event, e.g. present login screen.
+}
+```
+
 ### Understanding the errors
 
 `TIM` can throw a large set of errors, because of the different dependencies. Common for all errors it that they are wrapped in a `TIMError.auth()` or `TIMError.storage()` type depending on the area that throws the error. The errors will contain other errors coming from the stomach of the framework and there are a couple of levels in this.
