@@ -141,8 +141,10 @@ extension TIMAuthInternal {
 
     func enableBackgroundTimeout(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void) {
         backgroundMonitor.enable(durationSeconds: durationSeconds, timeoutHandler: { [weak self] in
-            self?.logout()
-            timeoutHandler()
+            if self?.isLoggedIn == true {
+                self?.logout()
+                timeoutHandler()
+            }
         })
     }
 
