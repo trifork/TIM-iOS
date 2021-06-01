@@ -1,5 +1,8 @@
 import XCTest
 import AppAuth
+#if canImport(Combine)
+import Combine
+#endif
 @testable import TIM
 @testable import TIMEncryptedStorage
 
@@ -192,7 +195,36 @@ final class TIMAuthInternalTests: XCTestCase {
         wait(for: [expect], timeout: 5.0)
         XCTAssertFalse(self.auth.isLoggedIn)
     }
-    
+
+    #if canImport(Combine)
+    @available(iOS 13, *)
+    func testBackgroundTimeoutForCombine() {
+        let expect = XCTestExpectation()
+        expect.expectedFulfillmentCount = 4
+        auth.enableBackgroundTimeout(durationSeconds: 1) {
+            XCTAssertFalse(self.auth.isLoggedIn)
+            expect.fulfill()
+        }
+
+        for _ in 0 ..< 4 {
+            performInitialLogin()  // Login again, since the time out logs the user out.
+            XCTAssertTrue(auth.isLoggedIn)
+
+            // Go to background
+            NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+
+            let waitExpect = XCTestExpectation()
+            // Wait for 2 seconds and return to foreground
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1100)) {
+                NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+                waitExpect.fulfill()
+            }
+            wait(for: [waitExpect], timeout: 2.0)
+            XCTAssertFalse(self.auth.isLoggedIn)
+        }
+        wait(for: [expect], timeout: 10.0)
+    }
+    #endif
 
     private func performInitialLogin() {
         let expect = XCTestExpectation(description: "Login should have returned")

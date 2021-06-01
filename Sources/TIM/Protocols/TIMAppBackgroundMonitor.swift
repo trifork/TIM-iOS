@@ -21,12 +21,12 @@ public protocol TIMAppBackgroundMonitor {
 extension TIMAppBackgroundMonitor {
     /// Combine wrapper of `enable(durationSeconds:handleTimeout:)`
     @available(iOS 13, *)
-    func enable(durationSeconds: TimeInterval) -> Future<Void, Never> {
-        Future { promise in
-            enable(durationSeconds: durationSeconds) {
-                promise(.success(Void()))
-            }
+    func enable(durationSeconds: TimeInterval) -> AnyPublisher<Void, Never> {
+        let subject = PassthroughSubject<Void, Never>()
+        enable(durationSeconds: durationSeconds) {
+            subject.send(Void())
         }
+        return subject.eraseToAnyPublisher()
     }
 }
 #endif

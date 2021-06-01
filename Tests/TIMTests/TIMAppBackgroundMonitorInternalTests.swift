@@ -1,6 +1,10 @@
 @testable import TIM
 import XCTest
 
+#if canImport(Combine)
+import Combine
+#endif
+
 final class TIMAppBackgroundMonitorInternalTests: XCTestCase {
     func testNoTimeout() {
 
@@ -60,4 +64,35 @@ final class TIMAppBackgroundMonitorInternalTests: XCTestCase {
         }
         wait(for: [expect], timeout: 10.0)
     }
+
+    #if canImport(Combine)
+    @available(iOS 13, *)
+    func testMultipleTimeoutsForCombine() {
+        var cancelBag = Set<AnyCancellable>()
+        let expect = XCTestExpectation(description: "Combine publisher should be invoked 4 times.")
+        expect.expectedFulfillmentCount = 4
+        let monitor = TIMAppBackgroundMonitorInternal()
+        monitor.enable(durationSeconds: 1)
+            .sink { _ in
+                expect.fulfill()
+            }
+            .store(in: &cancelBag)
+
+        XCTAssertEqual(monitor.timeoutDurationSeconds, 1)
+
+        for _ in 0 ..< 4 {
+            // Go to background, wait two seconds and go active again. Repeat 4 times to verify that the publisher is invoked multiple times.
+            NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+            XCTAssertNotNil(monitor.backgroundTimestamp)
+
+            let waitExpect = XCTestExpectation()
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1100)) {
+                NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+                waitExpect.fulfill()
+            }
+            wait(for: [waitExpect], timeout: 2.0)
+        }
+        wait(for: [expect], timeout: 10.0)
+    }
+    #endif
 }

@@ -56,7 +56,7 @@ public protocol TIMAuth {
 
 
     /// Enables timeout feature for when the app is in the background. The timeout will clear all current user session data within `TIM`.
-    /// The timeoutHandler will be invoked when the app becomes active, iff the app has been in the background longer than the specified duration.
+    /// The timeoutHandler will be invoked when the app becomes active, iff the app has been in the background longer than the specified duration and the user is logged in.
     /// - Parameters:
     ///   - durationSeconds: The duration in seconds to timeout for.
     ///   - timeoutHandler: A handler
@@ -103,12 +103,12 @@ public extension TIMAuth {
 
     /// Combine wrapper of `enableBackgroundTimeout(durationSeconds:timeoutHandler:)`
     @available(iOS 13, *)
-    func enableBackgroundTimeout(durationSeconds: TimeInterval) -> Future<Void, Never> {
-        Future { promise in
-            self.enableBackgroundTimeout(durationSeconds: durationSeconds) {
-                promise(.success(Void()))
-            }
+    func enableBackgroundTimeout(durationSeconds: TimeInterval) -> AnyPublisher<Void, Never> {
+        let subject = PassthroughSubject<Void, Never>()
+        enableBackgroundTimeout(durationSeconds: durationSeconds) {
+            subject.send(Void())
         }
+        return subject.eraseToAnyPublisher()
     }
 }
 #endif
