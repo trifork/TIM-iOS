@@ -4,14 +4,14 @@ import XCTest
 final class TIMStorageErrorTests: XCTestCase {
 
     func testIsKeyLocked() {
-        XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.secureStorageFailed(.failedToLoadData)).isKeyLocked())
+        XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.secureStorageFailed(.failedToLoadData("Test error!"))).isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badInternet)).isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badPassword)).isKeyLocked())
         XCTAssertTrue(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.keyLocked)).isKeyLocked())
     }
 
     func testIsWrongPassword() {
-        XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.secureStorageFailed(.failedToStoreData)).isWrongPassword())
+        XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.secureStorageFailed(.failedToStoreData("Test error!"))).isWrongPassword())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badInternet)).isWrongPassword())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.keyLocked)).isWrongPassword())
         XCTAssertTrue(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badPassword)).isWrongPassword())
@@ -25,7 +25,7 @@ final class TIMStorageErrorTests: XCTestCase {
     }
 
     func testIsBiometricError() {
-        XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.secureStorageFailed(.failedToLoadData)).isKeyLocked())
+        XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.secureStorageFailed(.failedToLoadData("Test error!"))).isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badInternet)).isKeyLocked())
         XCTAssertFalse(TIMStorageError.encryptedStorageFailed(.keyServiceFailed(.badPassword)).isKeyLocked())
         XCTAssertTrue(TIMStorageError.encryptedStorageFailed(.secureStorageFailed(.authenticationFailedForData)).isBiometricFailedError())

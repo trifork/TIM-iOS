@@ -54,7 +54,7 @@ final class TIMDataStorageInternal<SecureStorage: TIMSecureStorage> : TIMDataSto
         return encryptedStorage.secureStorage.get(item: item)
             .flatMap { (data) -> Result<T, TIMSecureStorageError> in
                 guard let converted = T.convert(data: data) else {
-                    return .failure(TIMSecureStorageError.failedToLoadData)
+                    return .failure(TIMSecureStorageError.failedToLoadData("Failed to convert `Data` object to specified `\(T.Type.self)` type."))
                 }
                 return .success(converted)
             }
