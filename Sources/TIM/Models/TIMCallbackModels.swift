@@ -22,7 +22,9 @@ public struct JWT {
     /// This value is optional, since isn't required on refresh tokens.
     public let expireDate: Date?
 
-    init?(token: JWTString) {
+    /// Failable initializer for `JWT`.
+    /// This will only succeed if the token contains a `sub` parameter.
+    public init?(token: JWTString) {
         self.token = token
         if let userId = token.userId {
             self.userId = userId
