@@ -22,20 +22,14 @@ Before using any function or property from `TIM` you have to configure the frame
 
 ```swift
 import TIM
-import TIMEncryptedStorage // Required for TIMKeyServiceConfiguration
 import AppAuth // Required for scopes
 
 let config = TIMConfiguration(
-    oidc: TIMOpenIDConfiguration(
-        issuer: URL(string: "<TIM issuer URL>")!,
-        clientId: "<clientId>",
-        redirectUri: URL(string: "<urlScheme>:/")!,
-        scopes: [OIDScopeOpenID, OIDScopeProfile]
-    ),
-    keyService: TIMKeyServiceConfiguration(
-        realmBaseUrl: "<TIM Keyservice URL>",
-        version: .v1
-    ),
+    timBaseUrl: URL(string: "<TIM base URL>")!,
+    realm: "<realm>",
+    clientId: "<clientId>",
+    redirectUri: URL(string:"<urlScheme>:/")!,
+    scopes: [ OIDScopeOpenID, OIDScopeProfile ],
     encryptionMethod: .aesGcm
 )
 TIM.configure(configuration: config)
