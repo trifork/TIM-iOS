@@ -2,6 +2,7 @@ import Foundation
 
 private let EXPIRE_KEY: String = "exp"
 private let SUB_KEY: String = "sub"
+private let ISSUER_KEY: String = "iss"
 
 /// Type alias for tokens - just a string.
 public typealias JWTString = String
@@ -17,5 +18,10 @@ extension JWTString {
     /// `sub` value
     var userId: String? {
         JWTDecoder.decode(jwtToken: self)[SUB_KEY] as? String
+    }
+
+    /// `iss` value
+    var issuer: String? {
+        JWTDecoder.decode(jwtToken: self)[ISSUER_KEY] as? String
     }
 }
