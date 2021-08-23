@@ -3,7 +3,7 @@ import XCTest
 
 final class JWTExtensionsTests: XCTestCase {
 
-    let simpleAccessToken: JWTString = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxMzM3fQ.RfalLtiTT6j_rBKX5pGm_jGmwwL-hIh-Qut7eLHiwtg"
+    let simpleAccessToken: JWTString = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxMzM3LCJpc3MiOiJodHRwczovL3RyaWZvcmsuY29tIn0.C_ERZ4zqvSLL0x1klZxERDzyDsjSFM-AYAsn0sdFmqE"
     let invalidJwt: JWTString = "INVALID"
 
     func testUserId() {
@@ -12,6 +12,10 @@ final class JWTExtensionsTests: XCTestCase {
 
     func testExpireTime() {
         XCTAssertEqual(simpleAccessToken.expireTimestamp, 1337)
+    }
+
+    func testIssuer() {
+        XCTAssertEqual(simpleAccessToken.issuer, "https://trifork.com")
     }
 
     func testInvalidToken() {

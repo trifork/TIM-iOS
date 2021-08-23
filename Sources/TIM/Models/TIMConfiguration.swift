@@ -13,7 +13,29 @@ public struct TIMConfiguration {
     public let encryptionMethod: TIMESEncryptionMethod
 
 
-    /// Constructor, `import TIMEncryptedStorage` to construct key service model.
+    /// Default constructor
+    /// - Parameters:
+    ///   - timBaseUrl: TIM base URL, e.g. https://trifork.com
+    ///   - realm: Realm, e.g. `"my-test-realm"`
+    ///   - clientId: Client Id, e.g. `"my-client"`
+    ///   - redirectUri: Redirect URI, e.g. `"my-app:/"`
+    ///   - scopes: Scopes, e.g. `["scope"]`
+    ///   - encryptionMethod: Encryption method, e.g. `.aesGcm`
+    ///   - keyServiceVersion: Optional key service version, defaults to `.v1`
+    public init(timBaseUrl: URL, realm: String, clientId: String, redirectUri: URL, scopes: [String], encryptionMethod: TIMESEncryptionMethod, keyServiceVersion: TIMKeyServiceVersion = .v1) {
+
+        let fullTimUrl = timBaseUrl.appendingPathComponent("/auth/realms/\(realm)")
+        self.oidcConfiguration = TIMOpenIDConfiguration(
+            issuer: fullTimUrl,
+            clientId: clientId,
+            redirectUri: redirectUri,
+            scopes: scopes
+        )
+        self.keyServiceConfiguration = TIMKeyServiceConfiguration(realmBaseUrl: fullTimUrl.absoluteString, version: keyServiceVersion)
+        self.encryptionMethod = encryptionMethod
+    }
+
+    /// Advanced custom constructor, `import TIMEncryptedStorage` to construct key service model.
     public init(oidc: TIMOpenIDConfiguration, keyService: TIMKeyServiceConfiguration, encryptionMethod: TIMESEncryptionMethod) {
         self.oidcConfiguration = oidc
         self.keyServiceConfiguration = keyService
