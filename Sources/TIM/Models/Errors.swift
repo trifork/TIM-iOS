@@ -29,6 +29,7 @@ public enum TIMAuthError: Error, LocalizedError {
     case appAuthFailed(Error?)
     case safariViewControllerCancelled
     case failedToGetRequiredDataInToken
+    case failedToValidateIDToken
 
     public var errorDescription: String? {
         switch self {
@@ -52,6 +53,8 @@ public enum TIMAuthError: Error, LocalizedError {
             return "The user cancelled OpenID connect login via SafariViewController"
         case .failedToGetRequiredDataInToken:
             return "TIM did not find the required data (userId) in the token. The 'sub' property must be present in the token!"
+        case .failedToValidateIDToken:
+            return "AppAuth failed to validate the ID Token. This will happen if the client's time is more than 10 minutes off the current time."
         }
     }
 
@@ -63,6 +66,7 @@ public enum TIMAuthError: Error, LocalizedError {
         if error.domain == OIDGeneralErrorDomain {
             switch error.code {
             case OIDErrorCode.networkError.rawValue: return .networkError
+            case OIDErrorCode.idTokenFailedValidationError.rawValue: return .failedToValidateIDToken
             default: return .appAuthFailed(error)
             }
         } else if error.domain == OIDOAuthTokenErrorDomain {
