@@ -14,9 +14,9 @@
         "package": "TIMEncryptedStorage",
         "repositoryURL": "https://github.com/trifork/TIMEncryptedStorage-iOS",
         "state": {
-          "branch": null,
-          "revision": "b1ce9555f1e421ed05299854e0f36b287075dec2",
-          "version": "2.1.3"
+          "branch": "bugfix/import-issue",
+          "revision": "0717fc6b796c19e7472f8efb439e3d3526194d5b",
+          "version": null
         }
       }
     ]
