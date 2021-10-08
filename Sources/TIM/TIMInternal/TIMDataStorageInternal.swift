@@ -123,7 +123,8 @@ extension TIMDataStorageInternal {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
-            completion(.failure(.storage(.encryptedStorageFailed(.secureStorageFailed(secureStorageError)))))
+            let error = mapAndHandleKeyIdLoadError(secureStorageError, userId: userId)
+            completion(.failure(error))
         case .success(let keyId):
             encryptedStorage.get(id: TIMDataStorageID.refreshToken(userId).toStorageId(), keyId: keyId, secret: password, completion: { (result) in
                 switch result {
@@ -147,7 +148,8 @@ extension TIMDataStorageInternal {
 
         switch keyIdResult {
         case .failure(let secureStorageError):
-            completion(.failure(.storage(.encryptedStorageFailed(.secureStorageFailed(secureStorageError)))))
+            let error = mapAndHandleKeyIdLoadError(secureStorageError, userId: userId)
+            completion(.failure(error))
         case .success(let keyId):
             encryptedStorage.getViaBiometric(id: TIMDataStorageID.refreshToken(userId).toStorageId(), keyId: keyId) { (result) in
                 switch result {
@@ -169,7 +171,8 @@ extension TIMDataStorageInternal {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(refreshToken.userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
-            completion(.failure(.storage(.encryptedStorageFailed(.secureStorageFailed(secureStorageError)))))
+            let error = mapAndHandleKeyIdLoadError(secureStorageError, userId: refreshToken.userId)
+            completion(.failure(error))
         case .success(let keyId):
             encryptedStorage.store(
                 id: TIMDataStorageID.refreshToken(refreshToken.userId).toStorageId(),
@@ -215,7 +218,8 @@ extension TIMDataStorageInternal {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
-            completion(.failure(.storage(.encryptedStorageFailed(.secureStorageFailed(secureStorageError)))))
+            let error = mapAndHandleKeyIdLoadError(secureStorageError, userId: userId)
+            completion(.failure(error))
         case .success(let keyId):
             encryptedStorage.enableBiometric(keyId: keyId, secret: password) { (result) in
                 completion(result.mapError({ .storage(.encryptedStorageFailed($0)) }))
@@ -227,7 +231,8 @@ extension TIMDataStorageInternal {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
-            return .failure(.storage(.encryptedStorageFailed(.secureStorageFailed(secureStorageError))))
+            let error = mapAndHandleKeyIdLoadError(secureStorageError, userId: userId)
+            return .failure(error)
         case .success(let keyId):
             return encryptedStorage.enableBiometric(keyId: keyId, longSecret: longSecret)
                 .mapError({ TIMError.storage(.encryptedStorageFailed($0)) })
@@ -247,6 +252,16 @@ extension TIMDataStorageInternal {
                 longSecret: longSecret) { (result) in
                 completion(result.mapError({ TIMError.storage(.encryptedStorageFailed($0)) }))
             }
+        }
+    }
+
+    private func mapAndHandleKeyIdLoadError(_ secureStorageError: TIMSecureStorageError, userId: String) -> TIMError {
+        switch secureStorageError {
+        case .failedToLoadData: // Failed to load keyId!
+            clear(userId: userId)
+            return .storage(.incompleteUserDataSet)
+        default:
+            return .storage(.encryptedStorageFailed(.secureStorageFailed(secureStorageError)))
         }
     }
 }
