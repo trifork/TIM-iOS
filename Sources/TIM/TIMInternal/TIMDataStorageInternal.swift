@@ -143,7 +143,7 @@ extension TIMDataStorageInternal {
 
     }
 
-    func getStoredRefreshTokenViaBiometric(userId: String, completion: @escaping (Result<BiometricRefreshToken, TIMError>) -> Void) {
+    func getStoredRefreshTokenViaBiometric(userId: String, willBeginNetworkRequests: WillBeginNetworkRequestsCallback? = nil, completion: @escaping (Result<BiometricRefreshToken, TIMError>) -> Void) {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(userId))
 
         switch keyIdResult {
@@ -151,7 +151,7 @@ extension TIMDataStorageInternal {
             let error = mapAndHandleKeyIdLoadError(secureStorageError, userId: userId)
             completion(.failure(error))
         case .success(let keyId):
-            encryptedStorage.getViaBiometric(id: TIMDataStorageID.refreshToken(userId).toStorageId(), keyId: keyId) { (result) in
+            encryptedStorage.getViaBiometric(id: TIMDataStorageID.refreshToken(userId).toStorageId(), keyId: keyId, willBeginNetworkRequests: willBeginNetworkRequests) { (result) in
                 switch result {
                 case .success(let model):
                     if let refreshToken = JWTString.convert(data: model.data), let jwt = JWT(token: refreshToken) {

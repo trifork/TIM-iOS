@@ -99,8 +99,8 @@ extension TIMAuthInternal {
         }
     }
 
-    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool = true, completion: @escaping AccessTokenCallback) {
-        storage.getStoredRefreshTokenViaBiometric(userId: userId) { (result) in
+    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool = true, willBeginNetworkRequests: WillBeginNetworkRequestsCallback?, completion: @escaping AccessTokenCallback) {
+        storage.getStoredRefreshTokenViaBiometric(userId: userId, willBeginNetworkRequests: willBeginNetworkRequests) { (result) in
             switch result {
             case .success(let bioResult):
                 self.openIdController.silentLogin(refreshToken: bioResult.refreshToken) { (result: Result<JWT, TIMAuthError>) in

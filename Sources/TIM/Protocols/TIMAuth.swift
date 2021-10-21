@@ -3,6 +3,7 @@ import UIKit
 import Combine
 #endif
 
+public typealias WillBeginNetworkRequestsCallback = () -> Void
 public typealias AccessTokenCallback = (Result<JWT, TIMError>) -> Void
 
 /// Auth protocol
@@ -50,9 +51,10 @@ public protocol TIMAuth {
     /// - Parameters:
     ///   - userId: The userId of the user (can be found in the access token or refresh token)
     ///   - storeNewRefreshToken: `true` if it should store the new refresh token, and `false` if not. Most people will need this as `true`
+    ///   - willBeginNetworkRequests: Invoked right after the biometric verification has succeeded and before the first network request is performed. Useful to show a loading indicator before the loading begins.
     ///   - completion: Invoked with the access token when the login was successful or an error if it fails.
     @available(iOS, deprecated: 13)
-    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool, completion: @escaping AccessTokenCallback)
+    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool, willBeginNetworkRequests: WillBeginNetworkRequestsCallback?, completion: @escaping AccessTokenCallback)
 
 
     /// Enables timeout feature for when the app is in the background. The timeout will clear all current user session data within `TIM`.
@@ -95,9 +97,9 @@ public extension TIMAuth {
 
     /// Combine wrapper of `loginWithBiometricId(userId:storeNewRefreshToken:completion:)`
     @available(iOS 13, *)
-    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool) -> Future<JWT, TIMError> {
+    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool, willBeginNetworkRequests: WillBeginNetworkRequestsCallback?) -> Future<JWT, TIMError> {
         Future { promise in
-            self.loginWithBiometricId(userId: userId, storeNewRefreshToken: storeNewRefreshToken, completion: promise)
+            self.loginWithBiometricId(userId: userId, storeNewRefreshToken: storeNewRefreshToken, willBeginNetworkRequests: willBeginNetworkRequests, completion: promise)
         }
     }
 
