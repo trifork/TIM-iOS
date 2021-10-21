@@ -37,10 +37,10 @@ final class TIMStorageInternalTests: XCTestCase {
             storage.storeRefreshToken(updatedRefreshTokenJwt, withExistingPassword: "1234") { (result) in
                 switch result {
                 case .failure(let error):
-                    if case TIMError.storage(.encryptedStorageFailed(TIMEncryptedStorageError.secureStorageFailed(TIMSecureStorageError.failedToLoadData))) = error {
+                    if case TIMError.storage(.incompleteUserDataSet) = error {
                         // All good!
                     } else {
-                        XCTFail("Should have produced failedToLoadData.")
+                        XCTFail("Should have produced incompleteUserDataSet.")
                     }
                 case .success:
                     XCTFail("This should have failed, because there is no keyId for the userId")
@@ -295,7 +295,6 @@ final class TIMStorageInternalTests: XCTestCase {
             XCTAssertTrue(storage.hasBiometricAccessForRefreshToken(userId: user1RefreshToken.userId!))
         }
     }
-
 
     // MARK: - Private helpers
     private func dataStorage(for encryptionMethod: TIMESEncryptionMethod) -> TIMDataStorageInternal<SecureStorageMock> {

@@ -42,9 +42,10 @@ public protocol TIMDataStorage {
     /// Gets a stored refresh token with biometric protection for a `userId`.
     /// - Parameters:
     ///   - userId: The `userId` from the refresh token
+    ///   - willBeginNetworkRequests: Invoked right after the biometric verification has succeeded and before the first network request is performed. Useful to show a loading indicator before the loading begins.
     ///   - completion: Invoked when the refresh token is loaded or the system fails to load it. The result contains the `longSecret`, which was used as secret from the biometric secure store.
     @available(iOS, deprecated: 13)
-    func getStoredRefreshTokenViaBiometric(userId: String, completion: @escaping (Result<BiometricRefreshToken, TIMError>) -> Void)
+    func getStoredRefreshTokenViaBiometric(userId: String, willBeginNetworkRequests: WillBeginNetworkRequestsCallback?, completion: @escaping (Result<BiometricRefreshToken, TIMError>) -> Void)
 
     /// Stores refresh token with existing password.
     /// - Parameters:
@@ -99,9 +100,9 @@ public extension TIMDataStorage {
         }
     }
 
-    func getStoredRefreshTokenViaBiometric(userId: String) -> Future<BiometricRefreshToken, TIMError> {
+    func getStoredRefreshTokenViaBiometric(userId: String, willBeginNetworkRequests: WillBeginNetworkRequestsCallback?) -> Future<BiometricRefreshToken, TIMError> {
         Future { promise in
-            self.getStoredRefreshTokenViaBiometric(userId: userId, completion: promise)
+            self.getStoredRefreshTokenViaBiometric(userId: userId, willBeginNetworkRequests: willBeginNetworkRequests, completion: promise)
         }
     }
 

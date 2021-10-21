@@ -94,10 +94,15 @@ public enum TIMAuthError: Error, LocalizedError {
 public enum TIMStorageError: Error, LocalizedError {
     case encryptedStorageFailed(TIMEncryptedStorageError)
 
+    // This error was implemented because we discovered missing keyIds for some users, where the user was cleared while waiting for response with a new refreshToken
+    case incompleteUserDataSet
+
     public var errorDescription: String? {
         switch self {
         case .encryptedStorageFailed(let error):
             return "The encrypted storage failed: \(error.localizedDescription)"
+        case .incompleteUserDataSet:
+            return "Attempt to store a refresh token for a user, that does not have a valid data set. This can happen if you clear the user data while waiting for a login (which definitely should be avoided!). The invalid data has now been cleared from the framework. The user will have to perform OIDC login again."
         }
     }
 
@@ -118,6 +123,8 @@ public enum TIMStorageError: Error, LocalizedError {
             default:
                 return false
             }
+        case .incompleteUserDataSet:
+            return false
         }
     }
 
@@ -144,6 +151,8 @@ public enum TIMStorageError: Error, LocalizedError {
             } else {
                 isKeyServiceError = false
             }
+        case .incompleteUserDataSet:
+            isKeyServiceError = false
         }
         return isKeyServiceError
     }
