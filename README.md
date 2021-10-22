@@ -147,7 +147,12 @@ TIM.auth.loginWithPassword(userId: userId, password: password, storeNewRefreshTo
     
 
 // Login with biometrics
-TIM.auth.loginWithBiometricId(userId: userId, storeNewRefreshToken: true)
+TIM.auth.loginWithBiometricId(
+    userId: userId, 
+    storeNewRefreshToken: true, 
+    willBeginNetworkRequests: {
+        // BioID succeeded, show loading indicator -> TIM will initiate network requests right now. 
+    })
     .sink(
         receiveCompletion: handleResultCompletion,
         receiveValue: { _ in })
@@ -161,10 +166,25 @@ func handleResultCompletion(_ completion: Subscribers.Completion<TIMError>) {
         
         switch error {
         case .storage(let storageError):
-            if storageError.isWrongPassword() {
-                // Handle wrong password
-            } else if storageError.isKeyLocked() {
-                // Handle key locked (three wrong password logins)
+            switch storageError {
+            case .incompleteUserDataSet:
+                // Reset user! We cannot recover from this state!
+                break
+            case .encryptedStorageFailed:
+                // Note that this is a simplified error handling, which uses the Bool extensions to avoid huge switch statements.
+                // If you want to handle errors the right way, you should look into all error cases and decide which you need specific
+                // error handling for. The ones you see here are the most common ones, which are very likely to happen.
+                if storageError.isWrongPassword() {
+                    // Handle wrong password
+                } else if storageError.isKeyLocked() {
+                    // Handle key locked (three wrong password logins)
+                } else if storageError.isBiometricFailedError() {
+                    // Bio failed or was cancelled, do nothing.
+                } else if storageError.isKeyServiceError() {
+                    // Something went wrong while communicating with the key service (possible network failure)
+                } else {
+                    // Something failed - please try again.
+                }
             }
         case .auth(let authError):
             if case TIMAuthError.refreshTokenExpired = authError {
