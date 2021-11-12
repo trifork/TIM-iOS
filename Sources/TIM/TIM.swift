@@ -49,8 +49,9 @@ public final class TIM {
     /// - Parameters:
     ///   - configuration: TIMConfiguration
     ///   - customLogger: An optional custom logger for logging messages internally from `TIM`. Set to `nil` to disable logging.
-    public static func configure(configuration: TIMConfiguration, customLogger: TIMLoggerProtocol? = TIMLogger()) {
-        guard _auth == nil && _storage == nil else {
+    ///   - allowReconfigure: Controls whether you are allowed to call this method multiple times. It is **discouraged**, but possible if really needed... Default value is `false`.
+    public static func configure(configuration: TIMConfiguration, customLogger: TIMLoggerProtocol? = TIMLogger(), allowReconfigure: Bool = false) {
+        guard (_auth == nil && _storage == nil) || allowReconfigure else {
             fatalError("🛑 You shouldn't configure TIM more than once!")
         }
 
