@@ -60,11 +60,11 @@ public final class TIM {
             keyService: TIMKeyService(configuration: configuration.keyServiceConfiguration),
             encryptionMethod: configuration.encryptionMethod
         )
-        let storage = TIMDataStorageInternal(encryptedStorage: encryptedStorage)
-        _auth = TIMAuthInternal(
+        let storage = TIMDataStorageDefault(encryptedStorage: encryptedStorage)
+        _auth = TIMAuthDefault(
             dataStorage: storage,
             openIdController: AppAuthController(configuration.oidcConfiguration),
-            backgroundMonitor: TIMAppBackgroundMonitorInternal()
+            backgroundMonitor: TIMAppBackgroundMonitorDefault()
         )
         _storage = storage
         logger = customLogger

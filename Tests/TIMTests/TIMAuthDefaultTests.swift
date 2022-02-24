@@ -6,11 +6,11 @@ import Combine
 @testable import TIM
 @testable import TIMEncryptedStorage
 
-final class TIMAuthInternalTests: XCTestCase {
+final class TIMAuthDefaultTests: XCTestCase {
 
     static private let keyServiceBaseUrl = "https://identitymanager.trifork.com"
 
-    static let storage = TIMDataStorageInternal(
+    static let storage = TIMDataStorageDefault(
         encryptedStorage: TIMEncryptedStorage(
             secureStorage: SecureStorageMock(),
             keyService: TIMKeyService(
@@ -22,10 +22,10 @@ final class TIMAuthInternalTests: XCTestCase {
             ),
             encryptionMethod: .aesCbc // Using CBC for these tests to support devices before iOS 13. Both encryption methods are tests throughly in the tests for the data storage.
         ))
-    let auth = TIMAuthInternal(
+    let auth = TIMAuthDefault(
         dataStorage: storage,
         openIdController: AppAuthControllerMock(),
-        backgroundMonitor: TIMAppBackgroundMonitorInternal()
+        backgroundMonitor: TIMAppBackgroundMonitorDefault()
     )
 
     override class func setUp() {

@@ -3,7 +3,7 @@ import AppAuth
 @testable import TIM
 @testable import TIMEncryptedStorage
 
-final class TIMStorageInternalTests: XCTestCase {
+final class TIMStorageDefaultTests: XCTestCase {
 
     static private let keyServiceBaseUrl = "https://identitymanager.trifork.com"
     private let testRefreshToken: JWTString = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk1MTYyMzkwMjJ9.fzHyQ0D6kSOr-6i4gEiJoOm5UutfqgivtqtXbwaRv1c"
@@ -297,8 +297,8 @@ final class TIMStorageInternalTests: XCTestCase {
     }
 
     // MARK: - Private helpers
-    private func dataStorage(for encryptionMethod: TIMESEncryptionMethod) -> TIMDataStorageInternal<SecureStorageMock> {
-        TIMDataStorageInternal(
+    private func dataStorage(for encryptionMethod: TIMESEncryptionMethod) -> TIMDataStorageDefault<SecureStorageMock> {
+        TIMDataStorageDefault(
             encryptedStorage: TIMEncryptedStorage(
                 secureStorage: SecureStorageMock(),
                 keyService: TIMKeyService(
@@ -313,7 +313,7 @@ final class TIMStorageInternalTests: XCTestCase {
         )
     }
 
-    private func storeRefreshTokenWithNewPassword(dataStorage: TIMDataStorageInternal<SecureStorageMock>, refreshToken: JWTString, password: String) -> TIMKeyModel {
+    private func storeRefreshTokenWithNewPassword(dataStorage: TIMDataStorageDefault<SecureStorageMock>, refreshToken: JWTString, password: String) -> TIMKeyModel {
         let createdKeyModel = TIMKeyModel(
             keyId: UUID().uuidString,
             key: "S2JQZVNoVm1ZcTN0Nnc5eQ==",
