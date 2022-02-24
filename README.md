@@ -35,6 +35,8 @@ let config = TIMConfiguration(
 TIM.configure(configuration: config)
 ```
 
+To configure TIM with custom implementations of dependencies, see the [custom setup instructions](#custom-setup-configuration).
+
 ### URL scheme
 Setup your URL scheme or Universal Links to receive login redirects: [Apple Documentation](https://developer.apple.com/documentation/xcode/allowing_apps_and_websites_to_link_to_your_content/defining_a_custom_url_scheme_for_your_app)
 
@@ -313,6 +315,60 @@ if storageError.isBiometricFailedError() {
 ```
 
 Other errors should of course still be handled, but can be handled in a more generic way, since they might be caused by network issues, server updates, or other unpredictable cases.
+
+## Custom setup configuration
+
+You can configure TIM with custom dependencies by injecting your own implementations of the defined protocols.
+This is available for specific projects, which are running on custom made versions of TIM.
+
+**DISCLAIMER:** This is *not* intended to be used with TIM hosted products. You better know what you are doing, if you go down this road 😅 
+
+The following is an example of how to do a custom configuration of TIM dependencies with the default implementations.
+By implementing the required protocols you can replace default implementations with your own.
+  
+```swift
+let keyServiceConfig = TIMKeyServiceConfiguration(
+    realmBaseUrl: "<TIM base URL>/auth/realms/<realm>",
+    version: .v1
+)
+let openIdConfiguration = TIMOpenIDConfiguration(
+    issuer: URL(string: "<TIM base URL>/auth/realms/<realm>")!,
+    clientId: "<clientId>",
+    redirectUri: URL(string: "<urlScheme>:/")!,
+    scopes: [OIDScopeOpenID, OIDScopeProfile]
+)
+
+let encryptedStorage = TIMEncryptedStorage(
+    secureStorage: TIMKeychain(),
+    keyService: TIMKeyService(
+        configuration: keyServiceConfig),
+    encryptionMethod: .aesGcm
+)
+let dataStorage = TIMDataStorageDefault(encryptedStorage: encryptedStorage)
+let auth = TIMAuthDefault(
+    dataStorage: dataStorage,
+    openIdController: AppAuthController(openIdConfiguration),
+    backgroundMonitor: TIMAppBackgroundMonitorDefault()
+)
+TIM.configure(
+    dataStorage: dataStorage,
+    auth: auth,
+    customLogger: TIMLogger()
+)
+```
+
+The above custom configuration is equivalent to this default configuration:
+```swift
+let config = TIMConfiguration(
+    timBaseUrl: URL(string: "<TIM base URL>")!,
+    realm: "<realm>",
+    clientId: "<clientId>",
+    redirectUri: URL(string: "<urlScheme>:/")!,
+    scopes: [OIDScopeOpenID, OIDScopeProfile],
+    encryptionMethod: .aesGcm
+)
+TIM.configure(configuration: config)
+```
 
 ## Architecture
 
