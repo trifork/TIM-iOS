@@ -5,11 +5,11 @@ import XCTest
 import Combine
 #endif
 
-final class TIMAppBackgroundMonitorInternalTests: XCTestCase {
+final class TIMAppBackgroundMonitorDefaultTests: XCTestCase {
     func testNoTimeout() {
 
         let expect = XCTestExpectation()
-        let monitor = TIMAppBackgroundMonitorInternal()
+        let monitor = TIMAppBackgroundMonitorDefault()
         monitor.enable(durationSeconds: 10) {
             XCTFail("Should not be invoked!")
         }
@@ -28,7 +28,7 @@ final class TIMAppBackgroundMonitorInternalTests: XCTestCase {
 
     func testTimeout() {
         let expect = XCTestExpectation()
-        let monitor = TIMAppBackgroundMonitorInternal()
+        let monitor = TIMAppBackgroundMonitorDefault()
         monitor.enable(durationSeconds: 1) {
             expect.fulfill()
         }
@@ -46,7 +46,7 @@ final class TIMAppBackgroundMonitorInternalTests: XCTestCase {
 
     func testDisable() {
         let expect = XCTestExpectation()
-        let monitor = TIMAppBackgroundMonitorInternal()
+        let monitor = TIMAppBackgroundMonitorDefault()
         monitor.enable(durationSeconds: 1) {
             XCTFail("Should not be invoked, since it was disabled!")
         }
@@ -71,7 +71,7 @@ final class TIMAppBackgroundMonitorInternalTests: XCTestCase {
         var cancelBag = Set<AnyCancellable>()
         let expect = XCTestExpectation(description: "Combine publisher should be invoked 4 times.")
         expect.expectedFulfillmentCount = 4
-        let monitor = TIMAppBackgroundMonitorInternal()
+        let monitor = TIMAppBackgroundMonitorDefault()
         monitor.enable(durationSeconds: 1)
             .sink { _ in
                 expect.fulfill()

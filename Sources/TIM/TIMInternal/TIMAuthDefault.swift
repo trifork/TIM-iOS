@@ -5,32 +5,32 @@ import TIMEncryptedStorage
 import Combine
 #endif
 
-class TIMAuthInternal : TIMAuth {
+public class TIMAuthDefault : TIMAuth {
 
     private let storage: TIMDataStorage
     private let openIdController: OpenIDConnectController
     private let backgroundMonitor: TIMAppBackgroundMonitor
 
-    init(dataStorage: TIMDataStorage, openIdController: OpenIDConnectController, backgroundMonitor: TIMAppBackgroundMonitor) {
+    public init(dataStorage: TIMDataStorage, openIdController: OpenIDConnectController, backgroundMonitor: TIMAppBackgroundMonitor) {
         self.storage = dataStorage
         self.openIdController = openIdController
         self.backgroundMonitor = backgroundMonitor
     }
 
-    var isLoggedIn: Bool {
+    public var isLoggedIn: Bool {
         return openIdController.isLoggedIn
     }
 
-    var refreshToken: JWT? {
+    public var refreshToken: JWT? {
         return openIdController.refreshToken()
     }
 
-    func logout() {
+    public func logout() {
         openIdController.logout()
     }
 
     @discardableResult
-    func handleRedirect(url: URL) -> Bool {
+    public func handleRedirect(url: URL) -> Bool {
         openIdController.handleRedirect(url: url)
     }
 }
@@ -40,14 +40,14 @@ class TIMAuthInternal : TIMAuth {
 /// Actual implementation using callbacks.
 /// From iOS 13 these are still used, but wrapped in a Combine interface with `Future`.
 @available(iOS, deprecated: 13)
-extension TIMAuthInternal {
-    func accessToken(_ completion: @escaping AccessTokenCallback) {
+extension TIMAuthDefault {
+    public func accessToken(_ completion: @escaping AccessTokenCallback) {
         openIdController.accessToken(forceRefresh: false) { (result: Result<JWT, TIMAuthError>) in
             completion(result.mapError({ TIMError.auth($0) }))
         }
     }
 
-    func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback) {
+    public func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback) {
         openIdController.login(
             presentingViewController: presentingViewController,
             completion: { (result: Result<JWT, TIMAuthError>) in
@@ -61,7 +61,7 @@ extension TIMAuthInternal {
         )
     }
 
-    func loginWithPassword(userId: String, password: String, storeNewRefreshToken: Bool = true, completion: @escaping AccessTokenCallback) {
+    public func loginWithPassword(userId: String, password: String, storeNewRefreshToken: Bool = true, completion: @escaping AccessTokenCallback) {
         storage.getStoredRefreshToken(userId: userId, password: password) { (result: Result<JWT, TIMError>) in
             switch result {
             case .success(let refreshJWT):
@@ -99,7 +99,7 @@ extension TIMAuthInternal {
         }
     }
 
-    func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool = true, willBeginNetworkRequests: WillBeginNetworkRequestsCallback?, completion: @escaping AccessTokenCallback) {
+    public func loginWithBiometricId(userId: String, storeNewRefreshToken: Bool = true, willBeginNetworkRequests: WillBeginNetworkRequestsCallback?, completion: @escaping AccessTokenCallback) {
         storage.getStoredRefreshTokenViaBiometric(userId: userId, willBeginNetworkRequests: willBeginNetworkRequests) { (result) in
             switch result {
             case .success(let bioResult):
@@ -139,7 +139,7 @@ extension TIMAuthInternal {
         }
     }
 
-    func enableBackgroundTimeout(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void) {
+    public func enableBackgroundTimeout(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void) {
         backgroundMonitor.enable(durationSeconds: durationSeconds, timeoutHandler: { [weak self] in
             if self?.isLoggedIn == true {
                 self?.logout()
@@ -148,7 +148,7 @@ extension TIMAuthInternal {
         })
     }
 
-    func disableBackgroundTimeout() {
+    public func disableBackgroundTimeout() {
         backgroundMonitor.disable()
     }
 }

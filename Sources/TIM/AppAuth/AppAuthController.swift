@@ -3,8 +3,7 @@ import AppAuth
 import SafariServices
 
 /// Protocol for OpenID Connect dependency.
-/// This protocol is only for test purposes and has no function for `TIM` it self.
-protocol OpenIDConnectController {
+public protocol OpenIDConnectController {
     var isLoggedIn: Bool { get }
     func login(presentingViewController: UIViewController, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?)
     func silentLogin(refreshToken: JWT, completion: @escaping (Result<JWT, TIMAuthError>) -> Void)
@@ -15,17 +14,17 @@ protocol OpenIDConnectController {
 }
 
 /// AppAuth implementation of `OpenIDConnectController` protocol.
-final class AppAuthController: OpenIDConnectController {
+public final class AppAuthController: OpenIDConnectController {
     private var currentAuthorizationFlow: OIDExternalUserAgentSession? = nil
 
     private var authState: OIDAuthState?
     private let credentials: TIMOpenIDConfiguration
 
-    var isLoggedIn: Bool {
+    public var isLoggedIn: Bool {
         authState != nil
     }
 
-    init(_ credentials: TIMOpenIDConfiguration) {
+    public init(_ credentials: TIMOpenIDConfiguration) {
         self.credentials = credentials
     }
 
@@ -83,7 +82,7 @@ final class AppAuthController: OpenIDConnectController {
             parameters: [:])
     }
 
-    func login(presentingViewController: UIViewController,
+    public func login(presentingViewController: UIViewController,
                 completion: @escaping ((Result<JWT, TIMAuthError>) -> Void),
                 didCancel: (() -> Void)? = nil,
                 willPresentSafariViewController: ((SFSafariViewController) -> Void)? = nil,
@@ -131,7 +130,7 @@ final class AppAuthController: OpenIDConnectController {
         }
     }
 
-    func silentLogin(refreshToken: JWT, completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
+    public func silentLogin(refreshToken: JWT, completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
         discoverConfiguration { [weak self] (res: Result<OIDServiceConfiguration, TIMAuthError>) in
             switch res {
             case .success(let configuration):
@@ -177,7 +176,7 @@ final class AppAuthController: OpenIDConnectController {
         }
     }
 
-    func accessToken(forceRefresh: Bool, _ completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
+    public func accessToken(forceRefresh: Bool, _ completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
         guard let authState = self.authState else {
             completion(.failure(TIMAuthError.authStateNil))
             return
@@ -203,7 +202,7 @@ final class AppAuthController: OpenIDConnectController {
         }
     }
 
-    func refreshToken() -> JWT? {
+    public func refreshToken() -> JWT? {
         if let refreshToken = authState?.refreshToken {
             return JWT(token: refreshToken)
         } else {
@@ -211,11 +210,11 @@ final class AppAuthController: OpenIDConnectController {
         }
     }
 
-    func logout() {
+    public func logout() {
         authState = nil
     }
 
-    func handleRedirect(url: URL) -> Bool {
+    public func handleRedirect(url: URL) -> Bool {
         let result: Bool
         if currentAuthorizationFlow?.resumeExternalUserAgentFlow(with: url) == true {
             currentAuthorizationFlow = nil

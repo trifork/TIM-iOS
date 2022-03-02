@@ -1,22 +1,24 @@
 import UIKit
 
-final class TIMAppBackgroundMonitorInternal : TIMAppBackgroundMonitor {
+public class TIMAppBackgroundMonitorDefault : TIMAppBackgroundMonitor {
     private (set) var timeoutDurationSeconds: TimeInterval?
     private (set) var backgroundTimestamp: Date?
     private var handleTimeoutEvent: (() -> Void)?
+
+    public init() { }
 
     deinit {
         disable()
     }
 
-    func enable(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void) {
+    public func enable(durationSeconds: TimeInterval, timeoutHandler: @escaping () -> Void) {
         disable()
         timeoutDurationSeconds = durationSeconds
         handleTimeoutEvent = timeoutHandler
         subscribeForEvents()
     }
 
-    func disable() {
+    public func disable() {
         handleTimeoutEvent = nil
         timeoutDurationSeconds = nil
         unsubscribeForEvents()

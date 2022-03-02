@@ -34,11 +34,11 @@ private enum TIMDataStorageID {
     }
 }
 
-final class TIMDataStorageInternal<SecureStorage: TIMSecureStorage> : TIMDataStorage {
+public class TIMDataStorageDefault<SecureStorage: TIMSecureStorage> : TIMDataStorage {
 
     private let encryptedStorage: TIMEncryptedStorage<SecureStorage>
 
-    init(encryptedStorage: TIMEncryptedStorage<SecureStorage>) {
+    public init(encryptedStorage: TIMEncryptedStorage<SecureStorage>) {
         self.encryptedStorage = encryptedStorage
     }
 
@@ -79,30 +79,30 @@ final class TIMDataStorageInternal<SecureStorage: TIMSecureStorage> : TIMDataSto
     }
 
     // MARK: -
-    var availableUserIds: Set<String> {
+    public var availableUserIds: Set<String> {
         return (try? get(storageId: .availableUserIds).get()) ?? []
     }
 
-    func hasRefreshToken(userId: String) -> Bool {
+    public func hasRefreshToken(userId: String) -> Bool {
         encryptedStorage.hasValue(id: TIMDataStorageID.refreshToken(userId).toStorageId()) &&
             encryptedStorage.hasValue(id: TIMDataStorageID.keyId(userId).toStorageId())
     }
 
-    func hasBiometricAccessForRefreshToken(userId: String) -> Bool {
+    public func hasBiometricAccessForRefreshToken(userId: String) -> Bool {
         guard let keyId: String = (try? get(storageId: .keyId(userId)).get()) else {
             return false
         }
         return encryptedStorage.hasBiometricProtectedValue(id: TIMDataStorageID.refreshToken(userId).toStorageId(), keyId: keyId)
     }
 
-    func disableBiometricAccessForRefreshToken(userId: String) {
+    public func disableBiometricAccessForRefreshToken(userId: String) {
         guard let keyId: String = (try? get(storageId: .keyId(userId)).get()) else {
             return
         }
         encryptedStorage.removeLongSecret(keyId: keyId)
     }
 
-    func clear(userId: String) {
+    public func clear(userId: String) {
         disableCurrentBiometricAccess(userId: userId)
 
         for id in TIMDataStorageID.allUserSpecificCases(userId: userId) {
@@ -118,8 +118,8 @@ final class TIMDataStorageInternal<SecureStorage: TIMSecureStorage> : TIMDataSto
 /// Actual implementation using callbacks.
 /// From iOS 13 these are still used, but wrapped in a Combine interface with `Future`.
 @available(iOS, deprecated: 13)
-extension TIMDataStorageInternal {
-    func getStoredRefreshToken(userId: String, password: String, completion: @escaping (Result<JWT, TIMError>) -> Void) {
+extension TIMDataStorageDefault {
+    public func getStoredRefreshToken(userId: String, password: String, completion: @escaping (Result<JWT, TIMError>) -> Void) {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
@@ -143,7 +143,7 @@ extension TIMDataStorageInternal {
 
     }
 
-    func getStoredRefreshTokenViaBiometric(userId: String, willBeginNetworkRequests: WillBeginNetworkRequestsCallback? = nil, completion: @escaping (Result<BiometricRefreshToken, TIMError>) -> Void) {
+    public func getStoredRefreshTokenViaBiometric(userId: String, willBeginNetworkRequests: WillBeginNetworkRequestsCallback? = nil, completion: @escaping (Result<BiometricRefreshToken, TIMError>) -> Void) {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(userId))
 
         switch keyIdResult {
@@ -167,7 +167,7 @@ extension TIMDataStorageInternal {
         }
     }
 
-    func storeRefreshToken(_ refreshToken: JWT, withExistingPassword password: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
+    public func storeRefreshToken(_ refreshToken: JWT, withExistingPassword password: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(refreshToken.userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
@@ -190,7 +190,7 @@ extension TIMDataStorageInternal {
         }
     }
 
-    func storeRefreshToken(_ refreshToken: JWT, withNewPassword newPassword: String, completion: @escaping (Result<TIMESKeyCreationResult, TIMError>) -> Void) {
+    public func storeRefreshToken(_ refreshToken: JWT, withNewPassword newPassword: String, completion: @escaping (Result<TIMESKeyCreationResult, TIMError>) -> Void) {
         encryptedStorage.storeWithNewKey(
             id: TIMDataStorageID.refreshToken(refreshToken.userId).toStorageId(),
             data: refreshToken.token.convert(),
@@ -214,7 +214,7 @@ extension TIMDataStorageInternal {
         )
     }
 
-    func enableBiometricAccessForRefreshToken(password: String, userId: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
+    public func enableBiometricAccessForRefreshToken(password: String, userId: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
@@ -227,7 +227,7 @@ extension TIMDataStorageInternal {
         }
     }
 
-    func enableBiometricAccessForRefreshToken(longSecret: String, userId: String) -> Result<Void, TIMError> {
+    public func enableBiometricAccessForRefreshToken(longSecret: String, userId: String) -> Result<Void, TIMError> {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
@@ -239,7 +239,7 @@ extension TIMDataStorageInternal {
         }
     }
 
-    func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
+    public func storeRefreshTokenWithLongSecret(_ refreshToken: JWT, longSecret: String, completion: @escaping (Result<Void, TIMError>) -> Void) {
         let keyIdResult: Result<String, TIMSecureStorageError> = get(storageId: .keyId(refreshToken.userId))
         switch keyIdResult {
         case .failure(let secureStorageError):
