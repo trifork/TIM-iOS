@@ -36,7 +36,7 @@ public protocol TIMAuth {
     ///   - presentingViewController: The view controller which the safari view controller should be presented on.
     ///   - completion: Invoked with access token after successful login (or with error)
     @available(iOS, deprecated: 13)
-    func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback)
+    func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback, authorizationRequestNonce: String?)
 
     /// Logs in using password. This can only be done if the user has stored the refresh token with a password after calling `performOpenIDConnectLogin`.
     /// - Parameters:
@@ -81,9 +81,9 @@ public extension TIMAuth {
 
     /// Combine wrapper of `performOpenIDConnectLogin(presentingViewController:completion:)`
     @available(iOS 13, *)
-    func performOpenIDConnectLogin(presentingViewController: UIViewController) -> Future<JWT, TIMError> {
+    func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String? = nil) -> Future<JWT, TIMError> {
         Future { promise in
-            self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: promise)
+            self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: promise, authorizationRequestNonce: authorizationRequestNonce)
         }
     }
 
