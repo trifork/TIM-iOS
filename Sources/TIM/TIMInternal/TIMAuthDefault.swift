@@ -47,7 +47,7 @@ extension TIMAuthDefault {
         }
     }
 
-    public func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback) {
+    public func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback, authorizationRequestNonce: String? = nil) {
         openIdController.login(
             presentingViewController: presentingViewController,
             completion: { (result: Result<JWT, TIMAuthError>) in
@@ -57,7 +57,8 @@ extension TIMAuthDefault {
                 completion(.failure(TIMError.auth(.safariViewControllerCancelled)))
             },
             willPresentSafariViewController: nil,
-            shouldAnimate: nil
+            shouldAnimate: nil,
+            authorizationRequestNonce: authorizationRequestNonce
         )
     }
 

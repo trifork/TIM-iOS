@@ -5,7 +5,7 @@ import SafariServices
 /// Protocol for OpenID Connect dependency.
 public protocol OpenIDConnectController {
     var isLoggedIn: Bool { get }
-    func login(presentingViewController: UIViewController, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?)
+    func login(presentingViewController: UIViewController, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?, authorizationRequestNonce: String?)
     func silentLogin(refreshToken: JWT, completion: @escaping (Result<JWT, TIMAuthError>) -> Void)
     func accessToken(forceRefresh: Bool, _ completion: @escaping (Result<JWT, TIMAuthError>) -> Void)
     func refreshToken() -> JWT?
@@ -86,7 +86,8 @@ public final class AppAuthController: OpenIDConnectController {
                 completion: @escaping ((Result<JWT, TIMAuthError>) -> Void),
                 didCancel: (() -> Void)? = nil,
                 willPresentSafariViewController: ((SFSafariViewController) -> Void)? = nil,
-                shouldAnimate: (() -> Bool)? = nil) {
+                shouldAnimate: (() -> Bool)? = nil,
+                authorizationRequestNonce: String? = nil) {
         discoverConfiguration { [weak self] (res: Result<OIDServiceConfiguration, TIMAuthError>) in
             guard let `self` = self else {
                 return
@@ -94,14 +95,8 @@ public final class AppAuthController: OpenIDConnectController {
 
             switch res {
             case .success(let config):
-                let request = OIDAuthorizationRequest(
-                    configuration: config,
-                    clientId: self.credentials.clientId,
-                    scopes: self.credentials.scopes,
-                    redirectURL: self.credentials.redirectUri,
-                    responseType: OIDResponseTypeCode,
-                    additionalParameters: [:]
-                )
+                let request = self.createAuthorizationRequest(config: config, authorizationRequestNonce: authorizationRequestNonce)
+                
                 self.doAuthState(
                     request: request,
                     presentingViewController: presentingViewController,
@@ -241,6 +236,35 @@ public final class AppAuthController: OpenIDConnectController {
         DispatchQueue.main.async {
             preCompletionAction?(result)
             completion(result)
+        }
+    }
+    
+    /// Create AuthorizationRequest using the authorizationRequestNonce in case it is provided
+    private func createAuthorizationRequest(config: OIDServiceConfiguration, authorizationRequestNonce: String?) -> OIDAuthorizationRequest {
+        if let authorizationRequestNonce = authorizationRequestNonce {
+            return OIDAuthorizationRequest(
+                configuration: config,
+                clientId: self.credentials.clientId,
+                clientSecret: nil,
+                scope: OIDScopeUtilities.scopes(with: self.credentials.scopes),
+                redirectURL: self.credentials.redirectUri,
+                responseType: OIDResponseTypeCode,
+                state: nil,
+                nonce: authorizationRequestNonce,
+                codeVerifier: nil,
+                codeChallenge: nil,
+                codeChallengeMethod: nil,
+                additionalParameters: [:]
+            )
+        } else {
+            return OIDAuthorizationRequest(
+                configuration: config,
+                clientId: self.credentials.clientId,
+                scopes: self.credentials.scopes,
+                redirectURL: self.credentials.redirectUri,
+                responseType: OIDResponseTypeCode,
+                additionalParameters: [:]
+            )
         }
     }
 
