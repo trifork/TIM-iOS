@@ -72,8 +72,8 @@ public protocol TIMAuth {
 /// Default parameters
 public extension TIMAuth {
     /// Wrapper of `performOpenIDConnectLogin(presentingViewController:completion:authorizationRequestNonce)` adding nil as default value for authorizationRequestNonce
-    func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback, authorizationRequestNonce: String? = nil) {
-        self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: completion, authorizationRequestNonce: authorizationRequestNonce)
+    func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback) {
+        self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: completion, authorizationRequestNonce: nil)
     }
 }
 
