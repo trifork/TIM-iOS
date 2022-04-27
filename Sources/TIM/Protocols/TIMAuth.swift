@@ -69,7 +69,17 @@ public protocol TIMAuth {
     func disableBackgroundTimeout()
 }
 
+/// Default parameters
+public extension TIMAuth {
+    /// Wrapper of `performOpenIDConnectLogin(presentingViewController:completion:authorizationRequestNonce)` adding nil as default value for authorizationRequestNonce
+    func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback, authorizationRequestNonce: String? = nil) {
+        self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: completion, authorizationRequestNonce: authorizationRequestNonce)
+    }
+}
+
+
 #if canImport(Combine)
+/// Combine wrappers
 public extension TIMAuth {
     /// Combine wrapper of `accessToken(_:)`
     @available(iOS 13, *)
@@ -78,8 +88,8 @@ public extension TIMAuth {
             self.accessToken(promise)
         }
     }
-
-    /// Combine wrapper of `performOpenIDConnectLogin(presentingViewController:completion:)`
+    
+    /// Combine wrapper of `performOpenIDConnectLogin(presentingViewController:completion:authorizationRequestNonce)`
     @available(iOS 13, *)
     func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String? = nil) -> Future<JWT, TIMError> {
         Future { promise in

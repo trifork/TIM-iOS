@@ -241,21 +241,12 @@ public final class AppAuthController: OpenIDConnectController {
     
     /// Create AuthorizationRequest using the authorizationRequestNonce in case it is provided
     private func createAuthorizationRequest(config: OIDServiceConfiguration, authorizationRequestNonce: String?) -> OIDAuthorizationRequest {
-        if authorizationRequestNonce == nil {
-            return OIDAuthorizationRequest(
-                configuration: config,
-                clientId: self.credentials.clientId,
-                scopes: self.credentials.scopes,
-                redirectURL: self.credentials.redirectUri,
-                responseType: OIDResponseTypeCode,
-                additionalParameters: [:]
-            )
-        } else {
+        if let authorizationRequestNonce = authorizationRequestNonce {
             return OIDAuthorizationRequest(
                 configuration: config,
                 clientId: self.credentials.clientId,
                 clientSecret: nil,
-                scope: self.credentials.scopes.joined(separator: " "),
+                scope: OIDScopeUtilities.scopes(with: self.credentials.scopes),
                 redirectURL: self.credentials.redirectUri,
                 responseType: OIDResponseTypeCode,
                 state: nil,
@@ -263,6 +254,15 @@ public final class AppAuthController: OpenIDConnectController {
                 codeVerifier: nil,
                 codeChallenge: nil,
                 codeChallengeMethod: nil,
+                additionalParameters: [:]
+            )
+        } else {
+            return OIDAuthorizationRequest(
+                configuration: config,
+                clientId: self.credentials.clientId,
+                scopes: self.credentials.scopes,
+                redirectURL: self.credentials.redirectUri,
+                responseType: OIDResponseTypeCode,
                 additionalParameters: [:]
             )
         }
