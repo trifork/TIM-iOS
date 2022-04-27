@@ -36,7 +36,7 @@ public protocol TIMAuth {
     ///   - presentingViewController: The view controller which the safari view controller should be presented on.
     ///   - completion: Invoked with access token after successful login (or with error)
     @available(iOS, deprecated: 13)
-    func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback, authorizationRequestNonce: String?)
+    func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String?, completion: @escaping AccessTokenCallback)
 
     /// Logs in using password. This can only be done if the user has stored the refresh token with a password after calling `performOpenIDConnectLogin`.
     /// - Parameters:
@@ -73,7 +73,7 @@ public protocol TIMAuth {
 public extension TIMAuth {
     /// Wrapper of `performOpenIDConnectLogin(presentingViewController:completion:authorizationRequestNonce)` adding nil as default value for authorizationRequestNonce
     func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback) {
-        self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: completion, authorizationRequestNonce: nil)
+        self.performOpenIDConnectLogin(presentingViewController: presentingViewController, authorizationRequestNonce: nil, completion: completion)
     }
 }
 
@@ -93,7 +93,7 @@ public extension TIMAuth {
     @available(iOS 13, *)
     func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String? = nil) -> Future<JWT, TIMError> {
         Future { promise in
-            self.performOpenIDConnectLogin(presentingViewController: presentingViewController, completion: promise, authorizationRequestNonce: authorizationRequestNonce)
+            self.performOpenIDConnectLogin(presentingViewController: presentingViewController, authorizationRequestNonce: authorizationRequestNonce, completion: promise)
         }
     }
 

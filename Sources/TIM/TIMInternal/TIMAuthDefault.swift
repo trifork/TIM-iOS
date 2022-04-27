@@ -47,7 +47,7 @@ extension TIMAuthDefault {
         }
     }
 
-    public func performOpenIDConnectLogin(presentingViewController: UIViewController, completion: @escaping AccessTokenCallback, authorizationRequestNonce: String? = nil) {
+    public func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String? = nil, completion: @escaping AccessTokenCallback) {
         openIdController.login(
             presentingViewController: presentingViewController,
             completion: { (result: Result<JWT, TIMAuthError>) in
