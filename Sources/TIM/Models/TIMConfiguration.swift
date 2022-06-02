@@ -22,14 +22,16 @@ public struct TIMConfiguration {
     ///   - scopes: Scopes, e.g. `["scope"]`
     ///   - encryptionMethod: Encryption method, e.g. `.aesGcm`
     ///   - keyServiceVersion: Optional key service version, defaults to `.v1`
-    public init(timBaseUrl: URL, realm: String, clientId: String, redirectUri: URL, scopes: [String], encryptionMethod: TIMESEncryptionMethod, keyServiceVersion: TIMKeyServiceVersion = .v1) {
+    ///   - additionalParameters: Optional additional parameters, for e.g. app-switch `[:]`
+    public init(timBaseUrl: URL, realm: String, clientId: String, redirectUri: URL, scopes: [String], encryptionMethod: TIMESEncryptionMethod, keyServiceVersion: TIMKeyServiceVersion = .v1, additionalParameters: [String, String]? = nil) {
 
         let fullTimUrl = timBaseUrl.appendingPathComponent("/auth/realms/\(realm)")
         self.oidcConfiguration = TIMOpenIDConfiguration(
             issuer: fullTimUrl,
             clientId: clientId,
             redirectUri: redirectUri,
-            scopes: scopes
+            scopes: scopes,
+            additionalParameters: additionalParameters
         )
         self.keyServiceConfiguration = TIMKeyServiceConfiguration(realmBaseUrl: fullTimUrl.absoluteString, version: keyServiceVersion)
         self.encryptionMethod = encryptionMethod
