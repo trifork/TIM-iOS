@@ -16,10 +16,10 @@ public struct TIMOpenIDConfiguration {
     public let scopes: [String]
     
     /// Scopes
-    public let additionalParameters: [String, String]?
+    public let additionalParameters: [String, String]
 
     /// Constructor
-    public init(issuer: URL, clientId: String, redirectUri: URL, scopes: [String], additionalParameters: [String, String]? = nil) {
+    public init(issuer: URL, clientId: String, redirectUri: URL, scopes: [String], additionalParameters: [String, String] = [:]) {
         self.issuer = issuer
         self.clientId = clientId
         self.redirectUri = redirectUri
