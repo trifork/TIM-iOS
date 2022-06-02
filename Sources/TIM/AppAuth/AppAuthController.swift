@@ -77,7 +77,7 @@ public final class AppAuthController: OpenIDConnectController {
                 scopes: credentials.scopes,
                 redirectURL: credentials.redirectUri,
                 responseType: OIDResponseTypeCode,
-                additionalParameters: [:]
+                additionalParameters: credentials.additionalParameters
             ),
             parameters: [:])
     }
@@ -142,7 +142,7 @@ public final class AppAuthController: OpenIDConnectController {
                     scopes: self.credentials.scopes,
                     refreshToken: refreshToken.token,
                     codeVerifier: nil,
-                    additionalParameters: nil
+                    additionalParameters: self.credentials.additionalParameters
                 )
                 OIDAuthorizationService.perform(request) { [weak self] (token: OIDTokenResponse?, error: Error?) in
                     let result: Result<JWT, TIMAuthError>
@@ -254,7 +254,7 @@ public final class AppAuthController: OpenIDConnectController {
                 codeVerifier: nil,
                 codeChallenge: nil,
                 codeChallengeMethod: nil,
-                additionalParameters: [:]
+                additionalParameters: self.credentials.additionalParameters
             )
         } else {
             return OIDAuthorizationRequest(
@@ -263,7 +263,7 @@ public final class AppAuthController: OpenIDConnectController {
                 scopes: self.credentials.scopes,
                 redirectURL: self.credentials.redirectUri,
                 responseType: OIDResponseTypeCode,
-                additionalParameters: [:]
+                additionalParameters: self.credentials.additionalParameters
             )
         }
     }
