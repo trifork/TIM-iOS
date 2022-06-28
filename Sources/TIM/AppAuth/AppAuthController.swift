@@ -241,20 +241,36 @@ public final class AppAuthController: OpenIDConnectController {
     
     /// Create AuthorizationRequest using the authorizationRequestNonce in case it is provided
     private func createAuthorizationRequest(config: OIDServiceConfiguration, authorizationRequestNonce: String?) -> OIDAuthorizationRequest {
-        var request = OIDAuthorizationRequest(
-            configuration: config,
-            clientId: self.credentials.clientId,
-            scopes: self.credentials.scopes,
-            redirectURL: self.credentials.redirectUri,
-            responseType: OIDResponseTypeCode,
-            additionalParameters: self.credentials.additionalParameters
-        )
         
-        if let nonce = authorizationRequestNonce {
-            request.nonce = nonce
+        if let authorizationRequestNonce = authorizationRequestNonce {
+            let state: String? = OIDAuthorizationRequest.generateState()
+            let codeVerifier: String? = OIDAuthorizationRequest.generateCodeVerifier()
+            let codeChallenge: String? = OIDAuthorizationRequest.codeChallengeS256(forVerifier: codeVerifier)
+            
+            return OIDAuthorizationRequest(
+                configuration: config,
+                clientId: self.credentials.clientId,
+                clientSecret: nil,
+                scope: OIDScopeUtilities.scopes(with: self.credentials.scopes),
+                redirectURL: self.credentials.redirectUri,
+                responseType: OIDResponseTypeCode,
+                state: state,
+                nonce: authorizationRequestNonce,
+                codeVerifier: codeVerifier,
+                codeChallenge: codeChallenge,
+                codeChallengeMethod: OIDOAuthorizationRequestCodeChallengeMethodS256,
+                additionalParameters: self.credentials.additionalParameters
+            )
+        } else {
+            return OIDAuthorizationRequest(
+                configuration: config,
+                clientId: self.credentials.clientId,
+                scopes: self.credentials.scopes,
+                redirectURL: self.credentials.redirectUri,
+                responseType: OIDResponseTypeCode,
+                additionalParameters: self.credentials.additionalParameters
+            )
         }
-        
-        return request
     }
 
 }
