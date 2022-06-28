@@ -241,31 +241,20 @@ public final class AppAuthController: OpenIDConnectController {
     
     /// Create AuthorizationRequest using the authorizationRequestNonce in case it is provided
     private func createAuthorizationRequest(config: OIDServiceConfiguration, authorizationRequestNonce: String?) -> OIDAuthorizationRequest {
-        if let authorizationRequestNonce = authorizationRequestNonce {
-            return OIDAuthorizationRequest(
-                configuration: config,
-                clientId: self.credentials.clientId,
-                clientSecret: nil,
-                scope: OIDScopeUtilities.scopes(with: self.credentials.scopes),
-                redirectURL: self.credentials.redirectUri,
-                responseType: OIDResponseTypeCode,
-                state: nil,
-                nonce: authorizationRequestNonce,
-                codeVerifier: nil,
-                codeChallenge: nil,
-                codeChallengeMethod: nil,
-                additionalParameters: self.credentials.additionalParameters
-            )
-        } else {
-            return OIDAuthorizationRequest(
-                configuration: config,
-                clientId: self.credentials.clientId,
-                scopes: self.credentials.scopes,
-                redirectURL: self.credentials.redirectUri,
-                responseType: OIDResponseTypeCode,
-                additionalParameters: self.credentials.additionalParameters
-            )
+        var request = OIDAuthorizationRequest(
+            configuration: config,
+            clientId: self.credentials.clientId,
+            scopes: self.credentials.scopes,
+            redirectURL: self.credentials.redirectUri,
+            responseType: OIDResponseTypeCode,
+            additionalParameters: self.credentials.additionalParameters
+        )
+        
+        if let nonce = authorizationRequestNonce {
+            request.nonce = nonce
         }
+        
+        return request
     }
 
 }
