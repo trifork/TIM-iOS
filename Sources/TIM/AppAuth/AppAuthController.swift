@@ -19,13 +19,15 @@ public final class AppAuthController: OpenIDConnectController {
 
     private var authState: OIDAuthState?
     private let credentials: TIMOpenIDConfiguration
+    private let customOIDExternalUserAgent: OIDExternalUserAgent?
 
     public var isLoggedIn: Bool {
         authState != nil
     }
 
-    public init(_ credentials: TIMOpenIDConfiguration) {
+    public init(_ credentials: TIMOpenIDConfiguration, customOIDExternalUserAgent: OIDExternalUserAgent? = nil) {
         self.credentials = credentials
+        self.customOIDExternalUserAgent = customOIDExternalUserAgent
     }
 
     private func discoverConfiguration(completion: @escaping (Result<OIDServiceConfiguration, TIMAuthError>) -> Void) {
@@ -50,14 +52,16 @@ public final class AppAuthController: OpenIDConnectController {
         shouldAnimate: @escaping () -> Bool,
         didCancel: @escaping () -> Void,
         callback: @escaping (Result<OIDAuthState, TIMAuthError>) -> Void) {
-        currentAuthorizationFlow = OIDAuthState.authState(
-            byPresenting: request,
-            externalUserAgent: AuthSFController(
+            let externalUserAgent = customOIDExternalUserAgent ?? AuthSFController(
                 presentingViewController: presentingViewController,
                 willPresentSafariViewControllerCallback: willPresentSafariViewController,
                 shouldAnimateCallback: shouldAnimate,
                 didCancelCallback: didCancel
-            )!,
+            )!
+
+        currentAuthorizationFlow = OIDAuthState.authState(
+            byPresenting: request,
+            externalUserAgent: externalUserAgent,
             callback: { (authState: OIDAuthState?, error: Error?) in
                 self.handleAppAuthCallback(
                     value: authState,
