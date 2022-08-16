@@ -152,5 +152,23 @@ extension TIMAuthDefault {
     public func disableBackgroundTimeout() {
         backgroundMonitor.disable()
     }
+    
+    public func changePassword(userId: String, currentPassword: String, newPassword: String, completion: @escaping (Result<JWT, TIMError>) -> Void) {
+        storage.getStoredRefreshToken(userId: userId, password: currentPassword) { [weak self] result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let jwt):
+                self?.storage.storeRefreshToken(jwt, withNewPassword: newPassword, completion: { result in
+                    switch result {
+                    case .failure(let error):
+                        completion(.failure(error))
+                    case .success:
+                        completion(.success(jwt))
+                    }
+                })
+            }
+        }
+    }
 }
 

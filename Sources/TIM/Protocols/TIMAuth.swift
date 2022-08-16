@@ -67,6 +67,11 @@ public protocol TIMAuth {
 
     /// Disables the background timeout
     func disableBackgroundTimeout()
+    
+    /// Changes the password for the password token.
+    ///
+    /// Note: This will not affect the biometric login.
+    func changePassword(userId: String, currentPassword: String, newPassword: String, completion: @escaping (Result<JWT, TIMError>) -> Void)
 }
 
 /// Default parameters
@@ -121,6 +126,14 @@ public extension TIMAuth {
             subject.send(Void())
         }
         return subject.eraseToAnyPublisher()
+    }
+    
+    /// Combine wrapper of `changePassword(userid:currentPassword:newPassword)`
+    @available(iOS 13, *)
+    func changePassword(userId: String, currentPassword: String, newPassword: String) -> Future<JWT, TIMError> {
+        Future { promise in
+            self.changePassword(userId: userId, currentPassword: currentPassword, newPassword: newPassword, completion: promise)
+        }
     }
 }
 #endif
