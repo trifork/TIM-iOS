@@ -238,6 +238,84 @@ final class TIMAuthDefaultTests: XCTestCase {
         wait(for: [expect], timeout: 5.0)
         XCTAssertFalse(self.auth.isLoggedIn)
     }
+    
+    func testChangePasswordWithCorrectPassword() {
+        performInitialLogin()
+        XCTAssertTrue(auth.isLoggedIn)
+        
+        // Store refresh token with new password
+        let keyModel = TIMKeyModel(keyId: UUID().uuidString, key: "eC9BJUQqRy1LYVBkU2dWaw==", longSecret: "longSecret")
+        URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .createKey, keyModel: keyModel)
+        URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel)
+        
+        let currentPassword = "1234"
+        let newPassword = "4321"
+        let userId = auth.refreshToken!.userId
+        
+        let initialExpect = XCTestExpectation()
+        Self.storage.storeRefreshToken(auth.refreshToken!, withNewPassword: currentPassword, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success:
+                initialExpect.fulfill()
+            }
+        })
+        
+        wait(for: [initialExpect], timeout: 5.0)
+        
+        let expect = XCTestExpectation()
+        auth.changePassword(userId: userId, currentPassword: currentPassword, newPassword: newPassword) { result in
+            switch result {
+            case .success:
+                expect.fulfill()
+            case .failure(let error):
+                XCTFail("There was an error: \(error)")
+            }
+        }
+        
+        wait(for: [expect], timeout: 5.0)
+        Self.storage.clear(userId: userId)
+    }
+    
+    func testChangePasswordWithWithWrongPassword() {
+        performInitialLogin()
+        XCTAssertTrue(auth.isLoggedIn)
+        
+        // Store refresh token with new password
+        let keyModel = TIMKeyModel(keyId: UUID().uuidString, key: "eC9BJUQqRy1LYVBkU2dWaw==", longSecret: "longSecret")
+        URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .createKey, keyModel: keyModel)
+        URLSessionStubResults.setKeyModel(baseUrl: Self.keyServiceBaseUrl, endpoint: .key, keyModel: keyModel)
+        
+        let currentPassword = "1234"
+        let newPassword = "4321"
+        let userId = auth.refreshToken!.userId
+        
+        let initialExpect = XCTestExpectation()
+        Self.storage.storeRefreshToken(auth.refreshToken!, withNewPassword: currentPassword, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success:
+                initialExpect.fulfill()
+            }
+        })
+        
+        wait(for: [initialExpect], timeout: 5.0)
+        
+        let expect = XCTestExpectation()
+        auth.changePassword(userId: userId, currentPassword: "1111", newPassword: newPassword) { result in
+            switch result {
+            case .success:
+                expect.fulfill()
+            case .failure(let error):
+                XCTFail("There was an error: \(error)")
+            }
+        }
+        
+        wait(for: [expect], timeout: 5.0)
+        Self.storage.clear(userId: userId)
+    }
 
     #if canImport(Combine)
     @available(iOS 13, *)
