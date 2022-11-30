@@ -41,12 +41,12 @@ public class TIMAuthDefault : TIMAuth {
 /// From iOS 13 these are still used, but wrapped in a Combine interface with `Future`.
 @available(iOS, deprecated: 13)
 extension TIMAuthDefault {
-    public func accessToken(_ completion: @escaping AccessTokenCallback) {
-        openIdController.accessToken(forceRefresh: false) { (result: Result<JWT, TIMAuthError>) in
+    public func accessToken(forceRefresh: Bool, _ completion: @escaping AccessTokenCallback) {
+        openIdController.accessToken(forceRefresh: forceRefresh) { (result: Result<JWT, TIMAuthError>) in
             completion(result.mapError({ TIMError.auth($0) }))
         }
     }
-
+    
     public func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String? = nil, completion: @escaping AccessTokenCallback) {
         openIdController.login(
             presentingViewController: presentingViewController,

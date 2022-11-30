@@ -25,10 +25,11 @@ public protocol TIMAuth {
 
     /// Gets the current access token from the current session if available.
     /// This will automatically renew the access token if necessary (by using the refresh token)
+    /// - Parameter forceRefresh: Force refresh an access token
     /// - Parameter completion: Invoked when access token is available / failed
     @available(iOS, deprecated: 13)
-    func accessToken(_ completion: @escaping AccessTokenCallback)
-
+    func accessToken(forceRefresh: Bool, _ completion: @escaping AccessTokenCallback)
+    
     /// Performs OAuth login with OpenID Connect by presenting a `SFSafariViewController` on the `presentingViewController`
     ///
     /// The `refreshToken` property will be available after this, which can be used to encrypt and store it in the secure store by the `storage` namespace.
@@ -78,17 +79,27 @@ public extension TIMAuth {
 }
 
 
+public extension TIMAuth {
+    /// Gets the current access token from the current session if available.
+    /// This will automatically renew the access token if necessary (by using the refresh token)
+    /// - Parameter completion: Invoked when access token is available / failed
+    @available(iOS, deprecated: 13)
+    func accessToken(_ completion: @escaping AccessTokenCallback) {
+        accessToken(forceRefresh: false, completion)
+    }
+}
+
 #if canImport(Combine)
 /// Combine wrappers
 public extension TIMAuth {
     /// Combine wrapper of `accessToken(_:)`
     @available(iOS 13, *)
-    func accessToken() -> Future<JWT, TIMError> {
+    func accessToken(forceRefresh: Bool = false) -> Future<JWT, TIMError> {
         Future { promise in
-            self.accessToken(promise)
+            self.accessToken(forceRefresh: forceRefresh, promise)
         }
     }
-    
+
     /// Combine wrapper of `performOpenIDConnectLogin(presentingViewController:completion:authorizationRequestNonce)`
     @available(iOS 13, *)
     func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String? = nil) -> Future<JWT, TIMError> {
