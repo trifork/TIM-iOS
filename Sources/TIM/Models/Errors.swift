@@ -19,7 +19,7 @@ public enum TIMError: Error, LocalizedError {
 
 /// Errors related to AppAuth operations
 public enum TIMAuthError: Error, LocalizedError {
-    case authStateNil
+    case authStateNil(stacktrace: [String] = Thread.callStackSymbols)
     case failedToDiscoverConfiguration
     case failedToBeginAuth
     case failedToGetAccessToken

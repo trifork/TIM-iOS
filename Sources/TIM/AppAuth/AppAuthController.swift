@@ -1,4 +1,3 @@
-import UIKit
 import AppAuth
 import SafariServices
 
@@ -177,7 +176,7 @@ public final class AppAuthController: OpenIDConnectController {
 
     public func accessToken(forceRefresh: Bool, _ completion: @escaping (Result<JWT, TIMAuthError>) -> Void) {
         guard let authState = self.authState else {
-            completion(.failure(TIMAuthError.authStateNil))
+            completion(.failure(TIMAuthError.authStateNil()))
             return
         }
         if forceRefresh {
