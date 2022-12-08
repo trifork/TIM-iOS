@@ -19,6 +19,7 @@ public enum TIMError: Error, LocalizedError {
 
 /// Errors related to AppAuth operations
 public enum TIMAuthError: Error, LocalizedError {
+    //TODO consider renaming this to "missingLogin" or alike which communicates the real issue.
     case authStateNil(stacktrace: [String] = Thread.callStackSymbols)
     case failedToDiscoverConfiguration
     case failedToBeginAuth
@@ -33,8 +34,8 @@ public enum TIMAuthError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .authStateNil:
-            return "The AuthState was nil, when it wasn't expected to be. Are you trying to get the access token, when there was no valid session?"
+        case .authStateNil(let stacktrace):
+            return "The AuthState was nil, when it wasn't expected to be. Are you trying to get the access token, when there was no valid session? (stacktrace: \(stacktrace))"
         case .failedToDiscoverConfiguration:
             return "Failed to discover the configuration on the server. Check your configuration setup and try again."
         case .failedToBeginAuth:
