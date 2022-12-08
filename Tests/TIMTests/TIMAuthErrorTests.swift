@@ -2,7 +2,7 @@ import XCTest
 import AppAuth
 @testable import TIM
 
-class TimErrorTests: XCTestCase {
+final class TimErrorTests: XCTestCase {
     
     func testIsSafariViewControllerCancelled(){
         XCTAssertFalse(TIMAuthError.failedToBeginAuth.isSafariViewControllerCancelled())
@@ -55,7 +55,25 @@ class TimErrorTests: XCTestCase {
         error.assertAppAuthFailed(expectedError: innerAuthError)
     }
     
-    
+    func testMapAppAuthErrorOIDOAuthTokenErrorDomainInvalidGrant(){
+        let innerAuthError = NSError(
+            domain: OIDOAuthTokenErrorDomain,
+            code: OIDErrorCodeOAuth.invalidGrant.rawValue
+        )
+        
+        let error = TIMAuthError.mapAppAuthError(innerAuthError)
+        error.assertRefreshTokenExpired()
+    }
+
+    func testMapAppAuthErrorOIDOAuthTokenErrorDomainUnknownErrorType(){
+        let innerAuthError = NSError(
+            domain: OIDOAuthTokenErrorDomain,
+            code: 999
+        )
+        
+        let error = TIMAuthError.mapAppAuthError(innerAuthError)
+        error.assertAppAuthFailed(expectedError: innerAuthError)
+    }
     
 }
 
@@ -81,6 +99,14 @@ extension TIMAuthError {
             
         } else {
             XCTFailTest(message: "Expected a failedToValidateIDToken but got \(self)")
+        }
+    }
+    
+    func assertRefreshTokenExpired(){
+        if case TIMAuthError.refreshTokenExpired = self  {
+            
+        } else {
+            XCTFailTest(message: "Expected a refreshTokenExpired but got \(self)")
         }
     }
 }
