@@ -185,7 +185,7 @@ public final class AppAuthController: OpenIDConnectController {
         }
         authState.performAction { (accessToken: String?, _, error: Error?) in
             self.handleAppAuthCallback(
-                value: accessToken.map { JWT(token: $0) },
+                value: accessToken.flatMap { JWT(token: $0) },
                 error: error,
                 fallbackError: TIMAuthError.failedToGetAccessToken,
                 completion: completion
