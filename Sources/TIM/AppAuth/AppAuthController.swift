@@ -184,20 +184,12 @@ public final class AppAuthController: OpenIDConnectController {
             authState.setNeedsTokenRefresh()
         }
         authState.performAction { (accessToken: String?, _, error: Error?) in
-            if let accessToken = accessToken {
-                if let jwt = JWT(token: accessToken) {
-                    self.handleAppAuthCallback(
-                        value: jwt,
-                        error: error,
-                        fallbackError: TIMAuthError.failedToGetAccessToken,
-                        completion: completion
-                    )
-                } else {
-                    completion(.failure(.failedToGetRequiredDataInToken))
-                }
-            } else {
-                completion(.failure(.failedToGetAccessToken))
-            }
+            self.handleAppAuthCallback(
+                value: accessToken.map { JWT(token: $0) },
+                error: error,
+                fallbackError: TIMAuthError.failedToGetAccessToken,
+                completion: completion
+            )
         }
     }
 
