@@ -13,7 +13,7 @@ let package = Package(
             targets: ["TIM"]),
     ],
     dependencies: [
-        .package(name: "AppAuth", url: "https://github.com/openid/AppAuth-iOS", .exact("1.4.0")),
+        .package(name: "AppAuth", url: "https://github.com/openid/AppAuth-iOS", .exact("1.6.0")),
         .package(name: "TIMEncryptedStorage", url: "https://github.com/trifork/TIMEncryptedStorage-iOS", .exact("2.2.1")),
 
     ],
