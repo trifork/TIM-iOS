@@ -53,13 +53,13 @@ public final class AppAuthController: OpenIDConnectController {
         didCancel: @escaping () -> Void,
         callback: @escaping (Result<OIDAuthState, TIMAuthError>) -> Void) {
             
-            guard customOIDExternalUserAgent != nil || presentingViewController != nil, let presentingViewController else {
+            guard customOIDExternalUserAgent != nil || presentingViewController != nil else {
                 callback(.failure(.noUserAgent))
                 return
             }
             
             let externalUserAgent = customOIDExternalUserAgent ?? AuthSFController(
-                presentingViewController: presentingViewController,
+                presentingViewController: presentingViewController!,
                 willPresentSafariViewControllerCallback: willPresentSafariViewController,
                 shouldAnimateCallback: shouldAnimate,
                 didCancelCallback: didCancel
