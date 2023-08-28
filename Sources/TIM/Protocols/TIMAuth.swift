@@ -115,6 +115,14 @@ public extension TIMAuth {
             self.performOpenIDConnectLogin(presentingViewController: presentingViewController, authorizationRequestNonce: authorizationRequestNonce, completion: promise)
         }
     }
+    
+    /// Combine wrapper of `performOpenIDConnectLogin(completion:authorizationRequestNonce)`
+    @available(iOS 13, *)
+    func performOpenIDConnectLogin(authorizationRequestNonce: String? = nil) -> Future<JWT, TIMError> {
+        Future { promise in
+            self.performOpenIDConnectLogin(authorizationRequestNonce: authorizationRequestNonce, completion: promise)
+        }
+    }
 
     /// Combine wrapper of `loginWithPassword(userId:password:storeNewRefreshToken:completion:)`
     @available(iOS 13, *)
