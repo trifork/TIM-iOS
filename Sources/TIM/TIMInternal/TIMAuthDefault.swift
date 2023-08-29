@@ -68,9 +68,7 @@ extension TIMAuthDefault {
             completion: { (result: Result<JWT, TIMAuthError>) in
                 completion(result.mapError({ TIMError.auth($0) }))
             },
-            didCancel: {
-                completion(.failure(TIMError.auth(.safariViewControllerCancelled)))
-            },
+            didCancel: { }, // Handle this in the custom view
             willPresentSafariViewController: nil,
             shouldAnimate: nil,
             authorizationRequestNonce: authorizationRequestNonce
