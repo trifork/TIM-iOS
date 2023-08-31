@@ -61,6 +61,19 @@ extension TIMAuthDefault {
             authorizationRequestNonce: authorizationRequestNonce
         )
     }
+    
+    public func performOpenIDConnectLogin(authorizationRequestNonce: String?, completion: @escaping AccessTokenCallback) {
+        openIdController.login(
+            presentingViewController: nil,
+            completion: { (result: Result<JWT, TIMAuthError>) in
+                completion(result.mapError({ TIMError.auth($0) }))
+            },
+            didCancel: { }, // Handle this in the custom view
+            willPresentSafariViewController: nil,
+            shouldAnimate: nil,
+            authorizationRequestNonce: authorizationRequestNonce
+        )
+    }
 
     public func loginWithPassword(userId: String, password: String, storeNewRefreshToken: Bool = true, completion: @escaping AccessTokenCallback) {
         storage.getStoredRefreshToken(userId: userId, password: password) { (result: Result<JWT, TIMError>) in

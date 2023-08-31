@@ -13,7 +13,7 @@ final class AppAuthControllerMock: OpenIDConnectController {
     private var rt: JWTString?
     private var at: JWTString?
 
-    func login(presentingViewController: UIViewController, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?, authorizationRequestNonce: String?) {
+    func login(presentingViewController: UIViewController?, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?, authorizationRequestNonce: String?) {
         guard let atJwt = JWT(token: mockAT), let rtJwt = JWT(token: mockRT) else {
             completion(.failure(.failedToGetAccessToken))
             return

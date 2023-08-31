@@ -30,6 +30,7 @@ public enum TIMAuthError: Error, LocalizedError {
     case safariViewControllerCancelled
     case failedToGetRequiredDataInToken
     case failedToValidateIDToken
+    case noUserAgent
 
     public var errorDescription: String? {
         switch self {
@@ -55,6 +56,8 @@ public enum TIMAuthError: Error, LocalizedError {
             return "TIM did not find the required data (userId) in the token. The 'sub' property must be present in the token!"
         case .failedToValidateIDToken:
             return "AppAuth failed to validate the ID Token. This will happen if the client's time is more than 10 minutes off the current time."
+        case .noUserAgent:
+            return "No user agent set up! Set a 'presentingViewController' or a custom 'OIDExternalUserAgentIOS' on init."
         }
     }
 

@@ -5,7 +5,7 @@ import SafariServices
 /// Protocol for OpenID Connect dependency.
 public protocol OpenIDConnectController {
     var isLoggedIn: Bool { get }
-    func login(presentingViewController: UIViewController, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?, authorizationRequestNonce: String?)
+    func login(presentingViewController: UIViewController?, completion: @escaping ((Result<JWT, TIMAuthError>) -> Void), didCancel: (() -> Void)?, willPresentSafariViewController: ((SFSafariViewController) -> Void)?, shouldAnimate: (() -> Bool)?, authorizationRequestNonce: String?)
     func silentLogin(refreshToken: JWT, completion: @escaping (Result<JWT, TIMAuthError>) -> Void)
     func accessToken(forceRefresh: Bool, _ completion: @escaping (Result<JWT, TIMAuthError>) -> Void)
     func refreshToken() -> JWT?
@@ -47,13 +47,19 @@ public final class AppAuthController: OpenIDConnectController {
 
     private func doAuthState(
         request: OIDAuthorizationRequest,
-        presentingViewController: UIViewController,
+        presentingViewController: UIViewController?,
         willPresentSafariViewController: @escaping (SFSafariViewController) -> Void,
         shouldAnimate: @escaping () -> Bool,
         didCancel: @escaping () -> Void,
         callback: @escaping (Result<OIDAuthState, TIMAuthError>) -> Void) {
+            
+            guard customOIDExternalUserAgent != nil || presentingViewController != nil else {
+                callback(.failure(.noUserAgent))
+                return
+            }
+            
             let externalUserAgent = customOIDExternalUserAgent ?? AuthSFController(
-                presentingViewController: presentingViewController,
+                presentingViewController: presentingViewController!,
                 willPresentSafariViewControllerCallback: willPresentSafariViewController,
                 shouldAnimateCallback: shouldAnimate,
                 didCancelCallback: didCancel
@@ -86,7 +92,7 @@ public final class AppAuthController: OpenIDConnectController {
             parameters: [:])
     }
 
-    public func login(presentingViewController: UIViewController,
+    public func login(presentingViewController: UIViewController?,
                 completion: @escaping ((Result<JWT, TIMAuthError>) -> Void),
                 didCancel: (() -> Void)? = nil,
                 willPresentSafariViewController: ((SFSafariViewController) -> Void)? = nil,

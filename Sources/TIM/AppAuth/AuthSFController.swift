@@ -10,11 +10,13 @@ public class AuthSFController: OIDExternalUserAgentIOS, SFSafariViewControllerDe
 
     /// User taps on cancel in SFSafariViewController
     private var didCancel: () -> Void
-
-    public required init?(presentingViewController: UIViewController,
-                          willPresentSafariViewControllerCallback: @escaping (SFSafariViewController) -> Void,
-                          shouldAnimateCallback: @escaping () -> Bool,
-                          didCancelCallback: @escaping () -> Void) {
+    
+    public required init?(
+        presentingViewController: UIViewController,
+        willPresentSafariViewControllerCallback: @escaping (SFSafariViewController) -> Void,
+        shouldAnimateCallback: @escaping () -> Bool,
+        didCancelCallback: @escaping () -> Void
+    ) {
         self.shouldAnimateCallback = shouldAnimateCallback
         self.willPresentSafariViewController = willPresentSafariViewControllerCallback
         self.presentingViewController = presentingViewController
