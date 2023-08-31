@@ -51,7 +51,8 @@ public final class TIM {
     ///   - configuration: TIMConfiguration
     ///   - customLogger: An optional custom logger for logging messages internally from `TIM`. Set to `nil` to disable logging.
     ///   - allowReconfigure: Controls whether you are allowed to call this method multiple times. It is **discouraged**, but possible if really needed... Default value is `false`.
-    public static func configure(
+    ///   - customOIDExternalUserAgent: A custom user agent for displaying the actual loginview. Using a `SFSafariViewController` is best practice. It's strongly discouraged to use `UIWebView` or `WKWebView` for security reasons.
+     public static func configure(
         configuration: TIMConfiguration,
         customLogger: TIMLoggerProtocol? = TIMLogger(),
         allowReconfigure: Bool = false,
