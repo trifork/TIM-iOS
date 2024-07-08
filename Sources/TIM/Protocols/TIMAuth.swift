@@ -38,6 +38,14 @@ public protocol TIMAuth {
     ///   - completion: Invoked with access token after successful login (or with error)
     @available(iOS, deprecated: 13)
     func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String?, completion: @escaping AccessTokenCallback)
+    
+    /// Performs OAuth login with OpenID Connect by presenting a custom `OIDExternalUserAgentIOS`. For this to work, remember to set up a custom useragent when configuring TIM.
+    ///
+    /// The `refreshToken` property will be available after this, which can be used to encrypt and store it in the secure store by the `storage` namespace.
+    /// - Parameters:
+    ///   - completion: Invoked with access token after successful login (or with error)
+    @available(iOS, deprecated: 13)
+    func performOpenIDConnectLogin(authorizationRequestNonce: String?, completion: @escaping AccessTokenCallback)
 
     /// Logs in using password. This can only be done if the user has stored the refresh token with a password after calling `performOpenIDConnectLogin`.
     /// - Parameters:
@@ -105,6 +113,14 @@ public extension TIMAuth {
     func performOpenIDConnectLogin(presentingViewController: UIViewController, authorizationRequestNonce: String? = nil) -> Future<JWT, TIMError> {
         Future { promise in
             self.performOpenIDConnectLogin(presentingViewController: presentingViewController, authorizationRequestNonce: authorizationRequestNonce, completion: promise)
+        }
+    }
+    
+    /// Combine wrapper of `performOpenIDConnectLogin(completion:authorizationRequestNonce)`
+    @available(iOS 13, *)
+    func performOpenIDConnectLogin(authorizationRequestNonce: String? = nil) -> Future<JWT, TIMError> {
+        Future { promise in
+            self.performOpenIDConnectLogin(authorizationRequestNonce: authorizationRequestNonce, completion: promise)
         }
     }
 
